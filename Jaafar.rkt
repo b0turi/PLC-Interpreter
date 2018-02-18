@@ -1,5 +1,16 @@
 (require "simpleParser.scm")
 
+; interpret takes a filename and returns a value from return
+(define interpret
+  (lambda (filename)
+    (ret_lookup (M_state_list (parser filename) '(('return)('null)))))) ; first state passed is the empty state with only the special return varrible with no assigned value (null)
+
+; ret_lookup
+(define ret_lookup
+  (lambda (s)
+    (M_value 'return s)))
+
+; 
 (define M_state_list
   (lambda (stmt-lis s)
     (cond
@@ -21,7 +32,7 @@
   (lambda (stmt s)
     (cond
       ((number? stmt) stmt)
-      ((list? stmt) 
+      ((list? stmt) ))))
 
 
 ; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
