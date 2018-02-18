@@ -10,6 +10,7 @@
   (lambda (stmt s)
     (cond
       ((null? stmt) s)
+      ((eq? (operator stmt) 'var) (add (M_name stmt)))
       ((eq? (operator stmt) 'return) (M_value (return stmt) s))
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s))
       (else s))))
@@ -20,7 +21,7 @@
   (lambda (stmt s)
     (cond
       ((number? stmt) stmt)
-      ((list? stmt
+      ((list? stmt) 
 
 
 ; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
