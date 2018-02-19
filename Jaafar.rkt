@@ -33,6 +33,10 @@
       (else (error 'invalidValue)))))
 
 ; M_evaluate
+(define M_evaluate
+  (lambda (exp s)
+    (cond
+      ((eq? (opperator stmt) '+) (+ (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
 
 ; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
 (define M_boolean
@@ -46,8 +50,6 @@
     (if (M_boolean condition s)
         (M_state then-statement (M_state condition s))
         (M_state else-statement (M_state condition s)))))
-
-
 
 
 ; M_state_while takes in a conditional, a body-statement, and a state and returns a state
@@ -98,7 +100,9 @@
 
 (define else
   (lambda (stmt)
-    (cadddr stmt)))
+    (if (null? (cdddr stmt))
+        '()
+        (cadddr stmt))))
 
 (define next
   (lambda (lis)
@@ -115,7 +119,6 @@
         'null
         (caddr stmt))))
 
-    ; Checks if
 (define math_operator?
   (lambda (op)
     (if
