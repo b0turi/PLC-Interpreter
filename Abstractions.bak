@@ -11,16 +11,16 @@
 #lang racket
 (provide (all-defined-out))
 
+
 ; ===== Lookup =====
 ; lookup
-; Given a variable name and a state, check if that variable is defined in that state.
-; Throws and appropriate error if the variable doesn't exist in the state or is uninitialized
+; given a variable name and a state, check if that variable is defined in that state.
+; Throws and apropreate error if the variable doesn't exist in the state or is uninitialized
 (define lookup
   (lambda (varname s)
     (lookup-cps varname (car s) (cadr s) (lambda (v) v))))
 
-; lookup-cps
-; A tail recursive helper for lookup
+; tail recursive helper for lookup
 (define lookup-cps
   (lambda (name namelis valuelis return)
     (cond
@@ -29,9 +29,7 @@
       ((eq? name (car namelis)) (return (car valuelis)))
       (else (lookup-cps name (cdr namelis) (cdr valuelis) return)))))
 
-; bool-lookup
-; An extention of lookup to handle boolean values and ensure that boolean
-; literals are returned where the atoms 'true and 'false are stored
+; lookup - except for boolean expressions, will convert from true to #t and false to #f
 (define bool-lookup
   (lambda (varname s)
     ((lambda (value)
@@ -46,28 +44,26 @@
 ; takes in a variable name and a list, returns 
 (define exist?
   (lambda (varname s)
-    (exist?-cps varname (car s) (lambda (v) v))))
+    (exist-cps varname (car s) (lambda (v) v))))
 
-; exist?-cps
-; A tail recursive helper for exist?
-(define exist?-cps
+; tail recursive helper for exist?
+(define exist-cps
   (lambda (name namelis return)
     (cond
       ((null? namelis) (return #f))
       ((eq? name (car namelis)) (return #t))
-      (else (exist?-cps name (cdr namelis) return)))))
+      (else (exist-cps name (cdr namelis) return)))))
 
 ; ===== Function "readers" =====
 
 ; return
-; Given a statement that is known to be a return statement,
-; return the value the statement dictates is to be returned
+; takes in a return statement and returns the expression to be returned
 (define return
   (lambda (stmt)
     (cadr stmt)))
 
 ; operator
-; Given a statement, retrieve the operator in the statement
+; takes in a statement and returns the operator
 (define operator
   (lambda (stmt)
     (cond
@@ -76,55 +72,66 @@
       (else (error 'invalidStatement)))))
 
 ; operand1
-; Given a statement, retrieve the first operand
+; takes in a statement and returns the first operand
 (define operand1
   (lambda (math_stmt)
     (cadr math_stmt)))
 
 ; operand2
-; Given a statement that is known to be a binary expression,
-; retrieve the second operand
+; takes in a statement and returns the second operand
 (define operand2
   (lambda (math_stmt)
     (caddr math_stmt)))
 
-; ==== If and While Statement Helpers ====
-
 ; condition
-; Given a statement that is known to be either an if statement or a while statement,
-; retrieve the condition that will determine which substatement runs in an if statement,
-; or whether the body will be executed again in a while statement
+; take in an if or while statement containing a condition and returns the condition
 (define condition
   (lambda (stmt)
     (cadr stmt)))
 
+; body
+; takes in a while statement and returns the body of that statement
+(define body
+  (lambda (stmt)
+    (caddr stmt)))
 ; then
-; Given a statement that is known to be an if statement,
-; retrieve the substatement to run when the condition is true
+; takes in an if statement and returns the "then" expression
 (define then
   (lambda (stmt)
     (caddr stmt)))
 
 ; else
-; Given a statement that is known to be an if statement, retrieve the substatement
-; to run when the condition is false, or '() if there is no else
+; takes in an if statement and returns the "else" expression if there is one, otherwise it returns '()
 (define else
   (lambda (stmt)
     (if (null? (cdddr stmt))
         '()
         (cadddr stmt))))
 
-; body
-; Given a statement that is known to be a while statement, retrieve the body
-(define body
+; next
+; returns the "next list" ie the cdr of the list
+(define next
+  (lambda (lis)
+    (cdr lis)))
+
+; var-name
+; retunrs the name of the variable in a variable declaration
+(define var-name
   (lambda (stmt)
-    (caddr stmt)))
+    (cadr stmt)))
+
+; assignment
+; returns the assignment expression for a variable declaration or assignment, 'null if there isn't one
+(define assignment
+  (lambda (stmt)
+    (if (null? (cddr stmt))
+        'null
+        (caddr stmt))))
 
 ; ===== STATE =====
 
 ; insert-state
-; Given a variable name, value, and a state, insert the variable with the given value into the state,
-; accounting for boolean literals, and return the new state with the variable added
+; add a variable with a given varname and value to a given state s, and return the new state
 (define insert-var
   (lambda (varname value s)
     (cond
@@ -133,7 +140,7 @@
       (else (list (cons varname (car s)) (cons value (cadr s)))))))
 
 ; replace-value
-; Given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
+; given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
 (define replace-value
   (lambda (varname value s)
     (cond
@@ -148,31 +155,6 @@
       ((null? namelis) (error "using before declaring"))
       ((equal? varname (car namelis)) (return namelis (cons value (cdr valuelis))))
       (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))))))))
-
-
-; ===== Miscellaneous =====
-
-; next
-; Given a list, return the list without its first element,
-; so the first element is the "next" element of the original list
-(define next
-  (lambda (lis)
-    (cdr lis)))
-
-; var-name
-; Given a statement known to be the declaration of a variable,
-; retrieve the name of the new variable
-(define var-name
-  (lambda (stmt)
-    (cadr stmt)))
-
-; assignment
-; returns the assignment expression for a variable declaration or assignment, 'null if there isn't one
-(define assignment
-  (lambda (stmt)
-    (if (null? (cddr stmt))
-        'null
-        (caddr stmt))))
 
 ; ===== OPERATIONS =====
 
