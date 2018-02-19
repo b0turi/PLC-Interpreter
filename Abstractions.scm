@@ -11,16 +11,16 @@
 #lang racket
 (provide (all-defined-out))
 
-
 ; ===== Lookup =====
 ; lookup
-; given a variable name and a state, check if that variable is defined in that state.
-; Throws and apropreate error if the variable doesn't exist in the state or is uninitialized
+; Given a variable name and a state, check if that variable is defined in that state.
+; Throws and appropriate error if the variable doesn't exist in the state or is uninitialized
 (define lookup
   (lambda (varname s)
     (lookup-cps varname (car s) (cadr s) (lambda (v) v))))
 
-; tail recursive helper for lookup
+; lookup-cps
+; A tail recursive helper for lookup
 (define lookup-cps
   (lambda (name namelis valuelis return)
     (cond
@@ -29,7 +29,9 @@
       ((eq? name (car namelis)) (return (car valuelis)))
       (else (lookup-cps name (cdr namelis) (cdr valuelis) return)))))
 
-; lookup - except for boolean expressions, will convert from true to #t and false to #f
+; bool-lookup
+; An extention of lookup to handle boolean values and ensure that boolean
+; literals are returned where the predefined values of true and false are stored
 (define bool-lookup
   (lambda (varname s)
     (boolvalue (lookup varname s))))
@@ -46,26 +48,28 @@
 ; takes in a variable name and a list, returns 
 (define exist?
   (lambda (varname s)
-    (exist-cps varname (car s) (lambda (v) v))))
+    (exist?-cps varname (car s) (lambda (v) v))))
 
-; tail recursive helper for exist?
-(define exist-cps
+; exist?-cps
+; A tail recursive helper for exist?
+(define exist?-cps
   (lambda (name namelis return)
     (cond
       ((null? namelis) (return #f))
       ((eq? name (car namelis)) (return #t))
-      (else (exist-cps name (cdr namelis) return)))))
+      (else (exist?-cps name (cdr namelis) return)))))
 
 ; ===== Function "readers" =====
 
 ; return
-; takes in a return statement and returns the expression to be returned
+; Given a statement that is known to be a return statement,
+; return the value the statement dictates is to be returned
 (define return
   (lambda (stmt)
     (cadr stmt)))
 
 ; operator
-; takes in a statement and returns the operator
+; Given a statement, retrieve the operator in the statement
 (define operator
   (lambda (stmt)
     (cond
@@ -74,72 +78,61 @@
       (else (error 'invalidStatement)))))
 
 ; operand1
-; takes in a statement and returns the first operand
+; Given a statement, retrieve the first operand
 (define operand1
   (lambda (math_stmt)
     (cadr math_stmt)))
 
 ; operand2
-; takes in a statement and returns the second operand
+; Given a statement that is known to be a binary expression,
+; retrieve the second operand
 (define operand2
   (lambda (math_stmt)
     (caddr math_stmt)))
 
+; ==== If and While Statement Helpers ====
+
 ; condition
-; take in an if or while statement containing a condition and returns the condition
+; Given a statement that is known to be either an if statement or a while statement,
+; retrieve the condition that will determine which substatement runs in an if statement,
+; or whether the body will be executed again in a while statement
 (define condition
   (lambda (stmt)
     (cadr stmt)))
 
-; body
-; takes in a while statement and returns the body of that statement
-(define body
-  (lambda (stmt)
-    (caddr stmt)))
 ; then
-; takes in an if statement and returns the "then" expression
+; Given a statement that is known to be an if statement,
+; retrieve the substatement to run when the condition is true
 (define then
   (lambda (stmt)
     (caddr stmt)))
 
 ; else
-; takes in an if statement and returns the "else" expression if there is one, otherwise it returns '()
+; Given a statement that is known to be an if statement, retrieve the substatement
+; to run when the condition is false, or '() if there is no else
 (define else
   (lambda (stmt)
     (if (null? (cdddr stmt))
         '()
         (cadddr stmt))))
 
-; next
-; returns the "next list" ie the cdr of the list
-(define next
-  (lambda (lis)
-    (cdr lis)))
-
-; var-name
-; retunrs the name of the variable in a variable declaration
-(define var-name
+; body
+; Given a statement that is known to be a while statement, retrieve the body
+(define body
   (lambda (stmt)
-    (cadr stmt)))
-
-; assignment
-; returns the assignment expression for a variable declaration or assignment, 'null if there isn't one
-(define assignment
-  (lambda (stmt)
-    (if (null? (cddr stmt))
-        'null
-        (caddr stmt))))
+    (caddr stmt)))
 
 ; ===== STATE =====
 
 ; insert-state
-; add a variable with a given varname and value to a given state s, and return the new state
+; Given a variable name, value, and a state, insert the variable with the given value into the state,
+; accounting for boolean literals, and return the new state with the variable added
 (define insert-var
   (lambda (varname value s)
     (list (cons varname (car s)) (cons (realvalue value) (cadr s)))))
 
 ; replace-value
-; given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
+; Given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
 (define replace-value
   (lambda (varname value s)
     (replaceval-cps varname (realvalue value) (car s) (cadr s) (lambda (l1 l2) (list l1 l2)))))
@@ -152,6 +145,34 @@
       ((equal? varname (car namelis)) (return namelis (cons value (cdr valuelis))))
       (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))))))))
 
+; ===== Miscellaneous =====
+
+; next
+; Given a list, return the list without its first element,
+; so the first element is the "next" element of the original list
+(define next
+  (lambda (lis)
+    (cdr lis)))
+
+; var-name
+; Given a statement known to be the declaration of a variable,
+; retrieve the name of the new variable
+(define var-name
+  (lambda (stmt)
+    (cadr stmt)))
+
+; assignment
+; Given a statement known to be an assignment to a variable,
+; retrieve the value that is to be assigned to the variable
+(define assignment
+  (lambda (stmt)
+    (if (null? (cddr stmt))
+        'null
+        (caddr stmt))))
+
+; realvalue
+; Given a value, check if the value is a boolean literal, and return
+; the equivalent atom for printing, or return the original value if not
 (define realvalue
   (lambda (v)
     (cond
@@ -161,26 +182,28 @@
 
 ; ===== OPERATIONS =====
 
-; unary-;
-; takes in a statment, returns true if the operation is the unary -
+; unary-?
+; Given a statement, return whether the statement is a unary expression with '- as the operator
+; as a boolean value
 (define unary-?
   (lambda (stmt)
     (and (equal? (car stmt) '-) (null? (cddr stmt)))))
 
 ; single_value?
-; takes in a statement, returns true if the operation uses only one value
+; Given a statement, return a boolean value as to whether the statement has only one operand
 (define single_value?
   (lambda (stmt)
     (or (eq? '! (operator stmt)) (unary-? stmt))))
 
 ; dual_value?
-; takes in an operator, returns true if the operator takes 2 values
+; Given a statement, return a boolean value as to whether the statement has two operands
 (define dual_value?
   (lambda (op)
     (or (value_op? op) (bool_op? op))))
 
 ; value_op?
-; takes in an operator, returns true if the operator operates on two numbers
+; Given an operator, return a boolean value as to whether the operator is a value operator,
+; or, an operator that requires two operands
 (define value_op?
   (lambda (op)
     (or
@@ -197,16 +220,18 @@
      (eq? '>= op))))
 
 ; bool_op?
-; takes in an operator, returns true if the operator operates on two booleans
+; Given an operator, return a boolean value as to whether the operator is a boolean operator,
+; or, an operator that can only operate on two booleans
 (define bool_op?
   (lambda (op)
     (or (eq? '&& op) (eq? '|| op))))
 
 ; operation
-; takes in a dual value and two values, returns the appropreate result for the operation given 
+; Given an operator and two operands, return the result of the operation on the two operands
 (define operation
   (lambda (op v1 v2)
     (cond
+      ; Value operators
       ((eq? '+ op) (+ v1 v2))
       ((eq? '- op) (- v1 v2))
       ((eq? '* op) (* v1 v2))
@@ -218,23 +243,26 @@
       ((eq? '> op) (> v1 v2))
       ((eq? '<= op) (<= v1 v2))
       ((eq? '>= op) (>= v1 v2))
+
+      ; Boolean operators
       ((eq? '&& op) (and v1 v2))
       ((eq? '|| op) (or v1 v2))
       (else (error "Operator not valid")))))
-      
-  
 
-; check if a value is the atom 'null
+; null_value?
+; Given a value, return a boolean value as to whether the value is the predefined null value
 (define null_value?
   (lambda (v)
     (eq? v (nullvalue))))
 
-; exp?: is the value an expression
+; exp?
+; Given an atom, return a boolean value as to whether the given atom is a pair, or, can be
+; interpreted as an expression
 (define exp?
   (lambda (v)
     (pair? v)))
 
-
+; ===== Predefined values =====
 (define returnvar
   (lambda ()
     'return))
