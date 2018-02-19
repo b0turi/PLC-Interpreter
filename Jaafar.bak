@@ -20,7 +20,7 @@
       ((eq? (operator stmt) 'return) (M_assign 'return (M_value (return stmt) s) s))
       ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt) (M_state (assignment stmt) s))))
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s))
-      (else s))))
+      (else s)))))
 
 
 ; M_value
@@ -33,24 +33,6 @@
       (else (error 'invalidValue)))))
 
 ; M_evaluate
-(define M_evaluate
-  (lambda (exp s)
-    (cond
-      ((eq? (operator stmt) '+) (M_value (+ (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '-) (M_value (- (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '*) (M_value (* (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '/) (M_value (quotient (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '%) (M_value (remainder (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '==) (M_boolean (= (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '!=) (M_boolean (not (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '<) (M_boolean (< (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '>) (M_boolean (> (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '<=) (M_boolean (<= (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '>=) (M_boolean (>= (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '>=) (M_boolean (>= (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '&&) (M_boolean (and (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '||) (M_boolean (or (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator stmt) '!) (M_boolean (not (M_boolean (operand1 exp) s)))))))
 
 ; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
 (define M_boolean
@@ -81,29 +63,12 @@
   (lambda (varname value s)
     (cond
       ((eq? varname 'return) (error 'nameReserved))
-      ((
-      ())))
+      ((lookup)))))
 
 ; M_assign takes a varriable value and state and returns the state with the varriable is assigned the value given 
-<<<<<<< HEAD
-;(define M_assign
-  ;(lambda ))
-=======
 (define M_assign
-  (lambda (varname value s)
-    (cond
-      ((eq?
->>>>>>> a5025eb6956d3772337ec6b7338eca43dee47507
+  (lambda 
 
-; lookup - given a variable name and a state, check if that variable is defined in that state. Return its value or 'varNotFound if the variable doesn't exist in the state
-(define lookup
-  (lambda (varname s)
-    (cond
-      ((null? (next-varname s)) 'varNotFound)
-      ((eq? varname (next-varname s)) (next-varvalue s))
-      (else (lookup varname (pop-state s))))))
-        
-      
 ;=================================================
 ; Abstractions
 ;=================================================
@@ -116,14 +81,6 @@
       ((list? stmt) (car stmt))
       (else (error 'invalidStatement)))))
 
-(define operand1
-  (lambda (math_stmt)
-    (cadr math_stmt)))
-
-(define operand2
-  (lambda (math_stmt)
-    (caddr math_stmt)))
-
 ; condition: take in an if or while statement containing a condition and returns the condition
 (define condition
   (lambda (stmt)
@@ -133,6 +90,7 @@
 (define body
   (lambda (stmt)
     (caddr stmt)))
+
 
 (define then
   (lambda (stmt)
@@ -150,25 +108,6 @@
   (lambda (stmt)
     (cadr stmt)))
 
-; next-varname: given a state s, get the name of the next variable in the state
-(define next-varname
-  (lambda (s)
-    (if (null? (car s))
-        '()
-        (caar s))))
-
-; next-varvalue: given a state s, get the value of the next variable in the state
-(define next-varvalue
-  (lambda (s)
-    (if (null? (car s))
-        '()
-        (cadr s))))
-        
-
-; pop-state: given a state s, return the state with the first element of the two sublists removed
-(define pop-state
-  (lambda (s)
-    (list (cdar s) (cdadr s))))
 
 (define assignment
   (lambda (stmt)
@@ -208,13 +147,6 @@
       (eq? '&& (op))
       (eq? '|| (op))
       (eq? '! (op))))))
-
-; check if a value is the atom 'null
-(define null_value?
-  (lambda (x)
-    (if (eq? 'null x)
-        #t
-        #f)))
 
 ; Checks whether or not there is an else statement
 
