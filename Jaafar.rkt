@@ -53,22 +53,11 @@
   (lambda (exp s)
     (cond
       ((unary? exp) (- 0 (M_value (operand1 exp) s)))
+      ((eq? (operator exp) '!) (not (M_boolean (operand1 exp) s)))
       ((eq? (operator exp) '=) (M_value (assignment exp) (M_state (assignment exp) s)))
-      ((eq? (operator exp) '+) (+ (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '-) (- (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '*) (* (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '/) (quotient (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '%) (remainder (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '==) (= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '!=) (not (= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
-      ((eq? (operator exp) '<) (< (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '>) (> (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '<=) (<= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '>=) (>= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '>=) (>= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '&&) (and (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '||) (or (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))))
-      ((eq? (operator exp) '!) (not (M_boolean (operand1 exp) s))))))
+      ((value_op? (operator exp)) ((operation (operator exp)) (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((bool_op? (operator exp)) ((operation (operator exp)) (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))))
+      (else (error "Operator not valid")))))
 
 ; M_state_if takes in a conditional statement and 2 outcomes, a then and an else, and a state and returns the appropriate state
 (define M_state_if
@@ -76,9 +65,6 @@
     (if (M_boolean condition s)
         (M_state then-statement (M_state condition s))
         (M_state else-statement (M_state condition s)))))
-
-
-
 
 ; M_state_while takes in a conditional, a body-statement, and a state and returns a state
 (define M_state_while
