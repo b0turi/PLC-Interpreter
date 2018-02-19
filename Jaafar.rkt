@@ -3,12 +3,7 @@
 ; interpret takes a filename and returns a value from return
 (define interpret
   (lambda (filename)
-    (ret_lookup (M_state_list (parser filename) '(('return)('null)))))) ; first state passed is the empty state with only the special return varrible with no assigned value (null)
-
-; ret_lookup
-(define ret_lookup
-  (lambda (s)
-    (lookup 'return s)))
+    (lookup 'return (M_state_list (parser filename) '(('return)('null)))))) ; first state passed is the empty state with only the special return varrible with no assigned value (null)
 
 ; M_state_list takes in a statement list stmt-lis and a state s and returns a state 
 (define M_state_list
@@ -23,7 +18,7 @@
     (cond
       ((null? stmt) s)
       ((eq? (operator stmt) 'return) (M_assign 'return (M_value (return stmt) s) s))
-      ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt)) s)
+      ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt) (M_state (assignment stmt) s))))
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s))
       (else s)))))
 
@@ -63,14 +58,14 @@
         s)))
 
 
-; Add: takes in a varriable, a value, and a state and adds the varriable with the given value to the state
+; Add: takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
 (define add
   (lambda (varname value s)
     (cond
       ((eq? varname 'return) (error 'nameReserved))
-      (( lookup)))))
+      ((lookup)))))
 
-; M_assign
+; M_assign takes a varriable value and state and returns the state with the varriable is assigned the value given 
 (define M_assign
   (lambda 
 
@@ -119,6 +114,39 @@
     (if (null? (cddr stmt))
         'null
         (caddr stmt))))
+
+    ; Checks if
+(define math_operator?
+  (lambda (op)
+    (if
+      ((null? op) (error 'nothing found))
+      (or
+       (eq? '+ (op))
+       (eq? '- (op))
+       (eq? '* (op))
+       (eq? '/ (op))
+       (eq? '% (op))))))
+
+(define comp_operator?
+  (lambda (op)
+    (if
+      (null? op) (error 'nothing found)
+      (or
+        (eq? '== (op))
+        (eq? '!= (op))
+        (eq? '< (op))
+        (eq? '> (op))
+        (eq? '<= (op))
+        (eq? '>= (op))))))
+
+(define bool_operator?
+  (lambda (op)
+    (if
+     (null? op) (error 'nothing found)
+     (or
+      (eq? '&& (op))
+      (eq? '|| (op))
+      (eq? '! (op))))))
 
 ; Checks whether or not there is an else statement
 
