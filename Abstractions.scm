@@ -142,6 +142,47 @@
      (eq? '&& op)
      (eq? '|| op))))
 
+(define value_op?
+  (lambda (op)
+    (or
+     (eq? '+ op)
+     (eq? '- op)
+     (eq? '* op)
+     (eq? '/ op)
+     (eq? '% op)
+     (eq? '== op)
+     (eq? '!= op)
+     (eq? '< op)
+     (eq? '> op)
+     (eq? '<= op)
+     (eq? '>= op))))
+
+(define bool_op?
+  (lambda (op)
+    (or
+     (eq? '&& op)
+     (eq? '|| op))))
+
+(define operation
+  (lambda (op)
+    (cond
+      ((eq? '+ op) +)
+      ((eq? '- op) -)
+      ((eq? '* op) *)
+      ((eq? '/ op) quotient)
+      ((eq? '% op) remainder)
+      ((eq? '== op) =)
+      ((eq? '!= op) (lambda (v1 v2) (not (= v1 v2))))
+      ((eq? '< op) <)
+      ((eq? '> op) >)
+      ((eq? '<= op) <=)
+      ((eq? '>= op) >=)
+      ((eq? '&& op) (lambda (v1 v2) (and v1 v2)))
+      ((eq? '|| op) (lambda (v1 v2) (or v1 v2)))
+      (else (error "Operator not valid")))))
+      
+  
+
 ; check if a value is the atom 'null
 (define null_value?
   (lambda (x)

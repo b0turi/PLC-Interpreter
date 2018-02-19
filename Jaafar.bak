@@ -103,9 +103,13 @@
       (M_state then-statement (M_state condition s))
       (M_state else-statement (M_state condition s)))))
 
+<<<<<<< HEAD
 ; M_state_while
 ; Given a condition, body, and state, recursively update the state until the condition is met
 
+=======
+; M_state_while takes in a conditional, a body-statement, and a state and returns a state
+>>>>>>> 290b00ee6af38d8aa4ad1c4162eeaf919ce88b56
 (define M_state_while
   (lambda (condition body-statement s)
     (if (M_boolean condition s)
