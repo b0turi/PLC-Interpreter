@@ -17,12 +17,13 @@
       ((null? stmt-lis) s)
       (else (M_state_list (next stmt-lis) (M_state (first stmt_lis s)))))))
 
+; M_state takes a statement and a state and retuns the state after the statment is evaluated
 (define M_state
   (lambda (stmt s)
     (cond
       ((null? stmt) s)
       ((eq? (operator stmt) 'return) (M_value (return stmt) s))
-      ((eq? (operator stmt) 'var) (add (var-name stmt) (assignment stmt) s)
+      ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt)) s)
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s))
       (else s))))
 
@@ -31,8 +32,7 @@
 (define M_value
   (lambda (stmt s)
     (cond
-      ((number? stmt) stmt)
-      ((list? stmt) ))))
+      ((list? stmt) (M_value )))))
 
 
 ; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
@@ -61,12 +61,8 @@
 
 ; Add: takes in a varriable, a value, and a state and adds the varriable with the given value to the state
 (define add
-  (lambda (varname s)
-    (
-
-
-; removevar: takes a state and a var and removes all instances of the var from the state
-    
+  (lambda (varname value s)
+    ()))
 
 ;=================================================
 ; Abstractions
@@ -103,14 +99,14 @@
 
 (define var-name
   (lambda (stmt)
-    (
+    (cadr stmt)))
 
 
 (define assignment
   (lambda (stmt)
     (if (null? (cddr stmt))
         'null
-        (cddr stmt))))
+        (caddr stmt))))
 
 ; Checks whether or not there is an else statement
 
