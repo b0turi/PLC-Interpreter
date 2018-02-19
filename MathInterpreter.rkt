@@ -3,8 +3,7 @@
 ; Main interpreter function
 
 (define interpret
-  (lambda (parser "testfile.txt")
-    ))
+  (lambda (parser "testfile.txt")))
 
 ; M-state operations
 
@@ -17,8 +16,7 @@
 (define M_state
   (lambda (stmt s)
     (cond
-      ((null? stmt) s)
-      ((eq? (
+      ((null? stmt) s))))
       
 
 
@@ -35,32 +33,48 @@
 ; Abstractions
 ;=========================================
 
-; Checks if it is
-(define is_operator
-  (lambda (math_expr)
-    (cond
-      ((null? operator) (error 'nothing found'))
-      ((eq? '+ (operator) #t))
-      ((eq? '- (operator) #t))
-      ((eq? '* (operator) #t))
-      ((eq? '/ (operator) #t))
-      ((eq? '% (operator) #t)))))
+; Checks if
+(define math_operator?
+  (lambda (op)
+    (if
+      ((null? op) (error 'nothing found))
+      (or
+       (eq? '+ (op))
+       (eq? '- (op))
+       (eq? '* (op))
+       (eq? '/ (op))
+       (eq? '% (op))))))
 
-(define is_comparison
-  (lambda (math_expr)
-    (cond
-      ((null? operator) (error 'nothing found'))
-      ((eq? 
+(define comp_operator?
+  (lambda (op)
+    (if
+      (null? op) (error 'nothing found)
+      (or
+        (eq? '== (op))
+        (eq? '!= (op))
+        (eq? '< (op))
+        (eq? '> (op))
+        (eq? '<= (op))
+        (eq? '>= (op))))))
+
+(define bool_operator?
+  (lambda (op)
+    (if
+     (null? op) (error 'nothing found)
+     (or
+      (eq? '&& (op))
+      (eq? '|| (op))
+      (eq? '! (op))))))
 
 (define operator
-  (lambda (math_expr)
-    (car math_expr)))
+  (lambda (math_stmt)
+    (car math_stmt)))
 
 (define operand1
-  (lambda (math_expr)
-    (cadr math_expr)))
+  (lambda (math_stmt)
+    (cadr math_stmt)))
 
 (define operand2
-  (lambda (math_expr)
-    (caddr math_expr)))
+  (lambda (math_stmt)
+    (caddr math_stmt)))
       
