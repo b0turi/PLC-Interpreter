@@ -32,12 +32,7 @@
 ; lookup - except for boolean expressions, will convert from true to #t and false to #f
 (define bool-lookup
   (lambda (varname s)
-    ((lambda (value)
-      (cond
-        ((eq? value (truevalue)) #t)
-        ((eq? value (falsevalue)) #f)
-        (else value)))
-     (lookup varname s))))
+    (eq? (lookup varname s) (truevalue))))
 
 ; ===== Exist? =====
 ; exist?
