@@ -34,12 +34,7 @@
 ; literals are returned where the predefined values of true and false are stored
 (define bool-lookup
   (lambda (varname s)
-    ((lambda (value)
-      (cond
-        ((eq? value (truevalue)) #t)
-        ((eq? value (falsevalue)) #f)
-        (else value)))
-     (lookup varname s))))
+    (eq? (lookup varname s) (truevalue))))
 
 ; ===== Exist? =====
 ; exist?

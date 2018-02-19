@@ -8,9 +8,10 @@
 ; Kyle Thompson
 ; ==========================================
 
+(require "simpleParser.scm")
+
 ; Abstraction methods were placed in a separate file to improve readability
 (require "Abstractions.scm")
-(require "simpleParser.scm")
 
 ; interpret
 ; Given a filename of Java/C-like code, use simpleParser to parse the file and then get the value that block of code returns
@@ -84,7 +85,7 @@
       ((eq? (operator exp) '=) (M_value (assignment exp) (M_state (assignment exp) s)))
       ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
       ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))))
-      (else (error "Operator not valid")))))
+      (else (error "Expression id not valid")))))
 
 ; M_state_if
 ; Given a condition, its relevant then and else statements, and a state, return the 
@@ -110,8 +111,8 @@
   (lambda (varname value s)
     (replace-value varname value s)))
 
-
-; M_state_declare takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
+; M_state_declare
+; takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
 (define M_state_declare
   (lambda (varname value s)
     (cond
