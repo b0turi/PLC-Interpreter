@@ -34,8 +34,8 @@
   (lambda (varname s)
     ((lambda (value)
       (cond
-        ((eq? value 'true) #t)
-        ((eq? value 'false) #f)
+        ((eq? value (truevalue)) #t)
+        ((eq? value (falsevalue)) #f)
         (else value)))
      (lookup varname s))))
 
@@ -134,19 +134,13 @@
 ; add a variable with a given varname and value to a given state s, and return the new state
 (define insert-var
   (lambda (varname value s)
-    (cond
-      ((eq? value #t) (list (cons varname (car s)) (cons 'true (cadr s))))
-      ((eq? value #f) (list (cons varname (car s)) (cons 'false (cadr s))))
-      (else (list (cons varname (car s)) (cons value (cadr s)))))))
+    (list (cons varname (car s)) (cons (realvalue value) (cadr s)))))
 
 ; replace-value
 ; given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
 (define replace-value
   (lambda (varname value s)
-    (cond
-      ((eq? value #t) (replaceval-cps varname 'true (car s) (cadr s) (lambda (l1 l2) (list l1 l2))))
-      ((eq? value #f) (replaceval-cps varname 'false (car s) (cadr s) (lambda (l1 l2) (list l1 l2))))
-      (else (replaceval-cps varname value (car s) (cadr s) (lambda (l1 l2) (list l1 l2)))))))
+    (replaceval-cps varname (realvalue value) (car s) (cadr s) (lambda (l1 l2) (list l1 l2)))))
 
 ; tail recursive helper for replace-value
 (define replaceval-cps
@@ -155,6 +149,13 @@
       ((null? namelis) (error "using before declaring"))
       ((equal? varname (car namelis)) (return namelis (cons value (cdr valuelis))))
       (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))))))))
+
+(define realvalue
+  (lambda (v)
+    (cond
+      ((eq? v #t) (truevalue))
+      ((eq? v #f) (falsevalue))
+      (else v))))
 
 ; ===== OPERATIONS =====
 
@@ -223,8 +224,31 @@
 
 ; check if a value is the atom 'null
 (define null_value?
-  (lambda (x)
-    (eq? 'null x)))
+  (lambda (v)
+    (eq? v (nullvalue))))
 
 ; exp?: is the value an expression
-(define exp? (lambda (v) (pair? v)))
+(define exp?
+  (lambda (v)
+    (pair? v)))
+
+
+(define returnvar
+  (lambda ()
+    'return))
+
+(define nullvalue
+  (lambda ()
+    'null))
+
+(define truevalue
+  (lambda ()
+    'true))
+
+(define falsevalue
+  (lambda ()
+    'false))
+
+(define initstate
+  (lambda ()
+    (list (list (returnvar)) (list nullvalue))))
