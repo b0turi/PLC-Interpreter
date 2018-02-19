@@ -17,9 +17,14 @@
   (lambda (stmt s)
     (cond
       ((null? stmt) s)
-      ((eq? (operator stmt) 'return) (M_assign 'return (M_value (return stmt) s) s))
+      ((eq? (operator stmt) 'return) (M_assign 'return (M_value (return stmt) s) (M_state (return stmt) s)))
       ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt) (M_state (assignment stmt) s))))
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s))
+      ((eq? (operator stmt) 'if) 'cry)
+      ((eq? (operator stmt) '=) (M_assign (var-name stmt) (assignment stmt) (M_state (assignment stmt) s)))
+      ((math_operator? (operator stmt)) (M_state (oprand2 stmt) (M_state (oprand1 stmt) s)))
+      ((comp_operator? (operator stmt)) (M_state (oprand2 stmt) (M_state (oprand1 stmt) s)))
+      ((bool_operator? (operator stmt)) (M_state (oprand2 stmt) (M_state (oprand1 stmt) s)))
       (else s)))))
 
 
@@ -32,16 +37,31 @@
       ((var? stmt) (lookup stmt s))
       (else (error 'invalidValue)))))
 
+; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
+(define M_boolean
+  (lambda (stmt s)
+    (cond
+      ((exp? stmt) (M_evaluate stmt s))
+      (((boolean? stmt) stmt)
+      (else (error 'invalidBoolean)))))
+
 ; M_evaluate
 (define M_evaluate
   (lambda (exp s)
     (cond
-      ((eq? (opperator stmt) '+) (+ (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
+      ((eq? (opperator stmt) '+) (M_value (+ (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))) s)
+      ((eq? (opperator stmt) '-) (- (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
+      ((eq? (opperator stmt) '*) (+ (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
+      ((eq? (opperator stmt) '==) (= (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
+      ((eq? (opperator stmt) '!=) (not (= (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s)))))
+      ((eq? (opperator stmt) '<) (< (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
+      ((eq? (opperator stmt) '>) (> (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
+      ((eq? (opperator stmt) '<=) (<= (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
+      ((eq? (opperator stmt) '>=) (>= (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
+      ((eq? (opperator stmt) '&&) (and (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
+      ((eq? (opperator stmt) '||) (or (M_value (oprand1 exp) s) (M_value (oprand2 exp) (M_state (oprand1 exp) s))))
+      ((eq? (opperator stmt) '!) (not (M_value (oprand1 exp) s)))
 
-; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
-(define M_boolean
-  (lambda (statement s)
-    s))
 
 
 ; M_state_if takes in a conditional statement and 2 outcomes, a then and an else, and a state and returns the appropriate state
