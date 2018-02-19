@@ -10,19 +10,19 @@
   (lambda (s)
     (M_value 'return s)))
 
-; 
+; M_state_list takes in a statement list stmt-lis and a state s and returns a state 
 (define M_state_list
   (lambda (stmt-lis s)
     (cond
-      ((null? statement-list) s)
-      (else (M_state_list (cdr stmt-lis) (M_state (car stmt_lis s)))))))
+      ((null? stmt-lis) s)
+      (else (M_state_list (next stmt-lis) (M_state (first stmt_lis s)))))))
 
 (define M_state
   (lambda (stmt s)
     (cond
       ((null? stmt) s)
-      ((eq? (operator stmt) 'var) (add (M_name stmt)))
       ((eq? (operator stmt) 'return) (M_value (return stmt) s))
+      ((eq? (operator stmt) 'var) (add (var-name stmt) (assignment stmt) s)
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s))
       (else s))))
 
@@ -60,6 +60,9 @@
 
 
 ; Add: takes in a varriable, a value, and a state and adds the varriable with the given value to the state
+(define add
+  (lambda (varname s)
+    (
 
 
 ; removevar: takes a state and a var and removes all instances of the var from the state
@@ -93,6 +96,21 @@
 (define else
   (lambda (stmt)
     (cadddr stmt)))
+
+(define next
+  (lambda (lis)
+    (cdr lis)))
+
+(define var-name
+  (lambda (stmt)
+    (
+
+
+(define assignment
+  (lambda (stmt)
+    (if (null? (cddr stmt))
+        'null
+        (cddr stmt))))
 
 ; Checks whether or not there is an else statement
 
