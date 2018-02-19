@@ -1,31 +1,61 @@
-(require "simpleParser.scm")
-(require "Abstractions.scm")
+; ==========================================
+; Interpreter, Part 1
+; EECS 345 - Programming Language Concepts
+;
+; Group 8
+; Jaafar Bennani
+; Kyle Thompson
+; Alex Hemm
+; ==========================================
 
-; interpret takes a filename and returns a value from return
+; Abstraction methods were placed in a separate file to improve readability
+(require "Abstractions.scm")
+(require "simpleParser.scm")
+
+; interpret
+; Given a filename of Java/C-like code, use simpleParser to parse the file and then get the value that block of code returns
+
 (define interpret
   (lambda (filename)
-    (lookup 'return (M_state_list (parser filename) '((return) (null)))))) ; first state passed is the empty state with only the special return varrible with no assigned value (null)
+     ; The initial state contains the special variable return with a default value of null
+    (lookup 'return (M_state_list (parser filename) '((return) (null)))))) 
 
-; M_state_list takes in a statement list stmt-lis and a state s and returns a state 
+; M_state_list
+; Given a list of statements and a state, evaluate each line with M_state and return the state
+; after each line has been evaluated
+
 (define M_state_list
   (lambda (stmt-lis s)
     (cond
       ((null? stmt-lis) s)
       (else (M_state_list (next stmt-lis) (M_state (first stmt-lis) s))))))
 
-; M_state takes a statement and a state and retuns the state after the statment is evaluated
+; M_state
+; Given a statement and a state, evaluate the statement and return the new state
+
 (define M_state
   (lambda (stmt s)
     (cond
+      ; Ensure that the statement can be evaluated
       ((null? stmt) s)
       ((not (exp? stmt)) s)
+
+      ; Check if the statement reassigns a value 
       ((eq? (operator stmt) 'return) (M_assign 'return (M_value (return stmt) s) (M_state (return stmt) s)))
-      ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
+      ((eq? (operator stmt) '=) (M_assign (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
+      
+      ; Check if the statement branches 
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s))
       ((eq? (operator stmt) 'if) (M_state_if (condition stmt) (then stmt) (else stmt) s))
-      ((eq? (operator stmt) '=) (M_assign (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
+
+      ; Check if the statement creates a new variable
+      ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
+
+      ; Check if the statement is a unary expression
       ((unary? stmt) (M_state (operand1 stmt) s))
       ((eq? (operator stmt) '!) (M_state (operand1 stmt) s))
+
+      ; Check if the statement is a binary expression 
       ((math_operator? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s)))
       ((comp_operator? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s)))
       ((bool_operator? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s)))
@@ -33,6 +63,8 @@
 
 
 ; M_value
+; Given a statement and a state, retrieve the value returned by the statement
+
 (define M_value
   (lambda (stmt s)
     (cond
@@ -41,17 +73,21 @@
       ((number? stmt) stmt)
       (else (lookup stmt s)))))
 
-; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
+; M_boolean
+; Given a boolean statement and a state, return the boolean value of the statement
+
 (define M_boolean
-  (lambda (stmt s)
+  (lambda (b-stmt s)
     (cond
-      ((exp? stmt) (M_evaluate stmt s))
-      ((boolean? stmt) stmt)
-      ((eq? stmt 'true) #t)
-      ((eq? stmt 'false) #f)
-      (else (bool-lookup stmt s)))))
+      ((exp? stmt) (M_evaluate b-stmt s))
+      ((boolean? b-stmt) b-stmt)
+      ((eq? b-stmt 'true) #t)
+      ((eq? b-stmt 'false) #f)
+      (else (bool-lookup b-stmt s)))))
 
 ; M_evaluate
+; Given an expression and a state, perform the necessary operations given by the expression and return the new state
+
 (define M_evaluate
   (lambda (exp s)
     (cond
@@ -73,22 +109,32 @@
       ((eq? (operator exp) '||) (M_boolean (or (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))) s))
       ((eq? (operator exp) '!) (M_boolean (not (M_boolean (operand1 exp) s)) s)))))
 
-; M_state_if takes in a conditional statement and 2 outcomes, a then and an else, and a state and returns the appropriate state
+; M_state_if
+; Given a condition, its relevant then and else statements, and a state, return the 
+; new state with the relevant statement evaluated, based on the condition
+
 (define M_state_if
   (lambda (condition then-statement else-statement s)
     (if (M_boolean condition s)
-        (M_state then-statement (M_state condition s))
-        (M_state else-statement (M_state condition s)))))
+      (M_state then-statement (M_state condition s))
+      (M_state else-statement (M_state condition s)))))
 
+; M_state_while
+; Given a condition, body, and state, recursively update the state until the condition is met
 
-
-
-; M_state_while takes in a conditional, a body-statement, and a state and returns a state
 (define M_state_while
   (lambda (condition body-statement s)
     (if (M_boolean condition s)
-        (M_state_while condition body-statement (M_state body-statement (M_state condition s)))
-        (M_state condition s))))
+      (M_state_while condition body-statement (M_state body-statement (M_state condition s)))
+      (M_state condition s))))
+
+; M_assign
+; Given a variable name, value, and a state, update the state so
+; that the value of the variable of the given name is the given value
+    
+(define M_assign
+  (lambda (varname value s)
+    (replace-value varname value s)))
 
 
 ; Add: takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
@@ -98,9 +144,3 @@
       ((eq? varname 'return) (error "Name Reserved"))
       ((exist? varname s) (error "Redefining"))
       (else (insert-var varname value s)))))
-
-; M_assign takes a varriable value and state and returns the state with the varriable is assigned the value given 
-    
-(define M_assign
-  (lambda (varname value s)
-    (replace-value varname value s)))
