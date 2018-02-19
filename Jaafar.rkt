@@ -63,14 +63,15 @@
   (lambda (varname value s)
     (cond
       ((eq? varname 'return) (error 'nameReserved))
-      ((
-      ())))
+      ((eq? (lookup varname s) 'varNotFound) (insert-var varname value s))
+      (else (error 'varialeAlreadyExists)))))
 
 ; M_assign takes a varriable value and state and returns the state with the varriable is assigned the value given 
 (define M_assign
   (lambda (varname value s)
-    (cond
-      ((eq?
+    (if (eq? (lookup varname s) value)
+        s
+        (replace-value varname value s))))
 
 ; lookup - given a variable name and a state, check if that variable is defined in that state. Return its value or 'varNotFound if the variable doesn't exist in the state
 (define lookup
@@ -132,12 +133,24 @@
     (if (null? (car s))
         '()
         (cadr s))))
-        
 
 ; pop-state: given a state s, return the state with the first element of the two sublists removed
 (define pop-state
   (lambda (s)
     (list (cdar s) (cdadr s))))
+
+; insert-state: add a variable with a given varname and value to a given state s, and return the new state
+(define insert-state
+  (lambda (varname value s)
+    (list (cons varname (cdar s)) (cons value (cdadr s)))))
+
+; replace-value: given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
+(define replace-value
+  (lambda (varname value s)
+    (cond
+      ((null? (next-varname s)) (error 'varNotFound))
+      ((eq? varname (next-varname s)) (list (car s) (cons value (cdadr s))))
+      (else (replace-value varname value (pop-state s)))
 
 (define assignment
   (lambda (stmt)
