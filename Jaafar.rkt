@@ -85,15 +85,11 @@
       ())))
 
 ; M_assign takes a varriable value and state and returns the state with the varriable is assigned the value given 
-<<<<<<< HEAD
-;(define M_assign
-  ;(lambda ))
-=======
+    
 (define M_assign
   (lambda (varname value s)
     (cond
       ((eq?
->>>>>>> a5025eb6956d3772337ec6b7338eca43dee47507
 
 ; lookup - given a variable name and a state, check if that variable is defined in that state. Return its value or 'varNotFound if the variable doesn't exist in the state
 (define lookup
