@@ -8,7 +8,7 @@
 ; ret_lookup
 (define ret_lookup
   (lambda (s)
-    (M_value 'return s)))
+    (lookup 'return s)))
 
 ; M_state_list takes in a statement list stmt-lis and a state s and returns a state 
 (define M_state_list
@@ -22,7 +22,7 @@
   (lambda (stmt s)
     (cond
       ((null? stmt) s)
-      ((eq? (operator stmt) 'return) (M_value (return stmt) s))
+      ((eq? (operator stmt) 'return) (M_assign 'return (M_value (return stmt) s) s))
       ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt)) s)
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s))
       (else s)))))
@@ -37,7 +37,7 @@
       ((var? stmt) (lookup stmt s))
       (else (error 'invalidValue)))))
 
-
+; M_evaluate
 
 ; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
 (define M_boolean
@@ -66,7 +66,13 @@
 ; Add: takes in a varriable, a value, and a state and adds the varriable with the given value to the state
 (define add
   (lambda (varname value s)
-    ()))
+    (cond
+      ((eq? varname 'return) (error 'nameReserved))
+      (( lookup)))))
+
+; M_assign
+(define M_assign
+  (lambda 
 
 ;=================================================
 ; Abstractions
