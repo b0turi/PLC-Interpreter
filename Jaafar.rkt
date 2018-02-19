@@ -50,7 +50,7 @@
       ((boolean? stmt) stmt)
       ((eq? stmt 'true) #t)
       ((eq? stmt 'false) #f)
-      ((exist? stmt s) (lookup stmt s))
+      ((exist? stmt s) (bool-lookup stmt s))
       (else (error 'invalidBoolean)))))
 
 ; M_evaluate

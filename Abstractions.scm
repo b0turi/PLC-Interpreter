@@ -6,6 +6,13 @@
 ; Abstractions
 ;=================================================
 
+(define bool?
+  (lambda (stmt)
+    (or
+     (boolean? stmt)
+     (eq? stmt 'true)
+     (eq? stmt 'false))))
+
 ; lookup - given a variable name and a state, check if that variable is defined in that state. Return its value or 'varNotFound if the variable doesn't exist in the state
 (define lookup
   (lambda (varname s)
@@ -16,10 +23,17 @@
     (cond
       ((null? namelis) (error "using before declaring"))
       ((and (eq? name (car namelis)) (eq? 'null (car valuelis))) (error "using before assigning"))
-      ((and (eq? name (car namelis)) (eq? #t (car valuelis))) (return 'true))
-      ((and (eq? name (car namelis)) (eq? #f (car valuelis))) (return 'false))
       ((eq? name (car namelis)) (return (car valuelis)))
       (else (lookup-cps name (cdr namelis) (cdr valuelis) return)))))
+
+(define bool-lookup
+  (lambda (varname s)
+    ((lambda (value)
+      (cond
+        ((eq? value 'true) #t)
+        ((eq? value 'false) #f)
+        (else value)))
+     (lookup varname s))))
 
 (define exist?
   (lambda (varname s)
@@ -88,12 +102,18 @@
 ; insert-state: add a variable with a given varname and value to a given state s, and return the new state
 (define insert-var
   (lambda (varname value s)
-    (list (cons varname (car s)) (cons value (cadr s)))))
+    (cond
+      ((eq? value #t) (list (cons varname (car s)) (cons 'true (cadr s))))
+      ((eq? value #f) (list (cons varname (car s)) (cons 'false (cadr s))))
+      (else (list (cons varname (car s)) (cons value (cadr s)))))))
 
 ; replace-value: given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
 (define replace-value
   (lambda (varname value s)
-    (replaceval-cps varname value (car s) (cadr s) (lambda (l1 l2) (list l1 l2)))))
+    (cond
+      ((eq? value #t) (replaceval-cps varname 'true (car s) (cadr s) (lambda (l1 l2) (list l1 l2))))
+      ((eq? value #f) (replaceval-cps varname 'false (car s) (cadr s) (lambda (l1 l2) (list l1 l2))))
+      (else (replaceval-cps varname value (car s) (cadr s) (lambda (l1 l2) (list l1 l2)))))))
 
 (define replaceval-cps
   (lambda (varname value namelis valuelis return)
