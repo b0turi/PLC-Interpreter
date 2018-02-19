@@ -20,10 +20,10 @@
       ((null? stmt) s)
       ((not (exp? stmt)) s)
       ((eq? (operator stmt) 'return) (M_assign 'return (M_value (return stmt) s) (M_state (return stmt) s)))
-      ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt) (M_state (assignment stmt) s)) (M_state (assignment stmt) s)))
+      ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s))
       ((eq? (operator stmt) 'if) (M_state_if (condition stmt) (then stmt) (else stmt) s))
-      ((eq? (operator stmt) '=) (M_assign (var-name stmt) (M_value (assignment stmt) (M_state (assignment stmt) s)) (M_state (assignment stmt) s)))
+      ((eq? (operator stmt) '=) (M_assign (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
       ((unary? stmt) (M_state (operand1 stmt) s))
       ((eq? (operator stmt) '!) (M_state (operand1 stmt) s))
       ((math_operator? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s)))
@@ -39,7 +39,7 @@
       ((exp? stmt) (M_evaluate stmt s))
       ((eq? stmt 'null) 'null)
       ((number? stmt) stmt)
-      ((var? stmt s) (lookup stmt s))
+      ((exist? stmt s) (lookup stmt s))
       (else (error 'invalidValue)))))
 
 ; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
@@ -48,13 +48,17 @@
     (cond
       ((exp? stmt) (M_evaluate stmt s))
       ((boolean? stmt) stmt)
+      ((eq? stmt 'true) #t)
+      ((eq? stmt 'false) #f)
+      ((exist? stmt s) (lookup stmt s))
       (else (error 'invalidBoolean)))))
 
 ; M_evaluate
 (define M_evaluate
   (lambda (exp s)
     (cond
-      ((unary? exp) (M_value (* (M_value (operand1 exp) s) -1) s))   
+      ((unary? exp) (M_value (* (M_value (operand1 exp) s) -1) s))
+      ((eq? (operator exp) '=) (M_value (assignment exp) (M_state (assignment exp) s)))
       ((eq? (operator exp) '+) (M_value (+ (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
       ((eq? (operator exp) '-) (M_value (- (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
       ((eq? (operator exp) '*) (M_value (* (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
@@ -86,21 +90,48 @@
   (lambda (condition body-statement s)
     (if (M_boolean condition s)
         (M_state_while condition body-statement (M_state body-statement (M_state condition s)))
-        s)))
+        (M_state condition s))))
 
 
 ; Add: takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
 (define add
   (lambda (varname value s)
     (cond
-      ((eq? varname 'return) (error 'nameReserved))
-      ((eq? (lookup varname s) 'varNotFound) (insert-var varname value s))
-      (else (error 'variableAlreadyExists)))))
+      ((eq? varname 'return) (error "Name Reserved"))
+      ((exist? varname s) (error "Redefining"))
+      (else (insert-var varname value s)))))
 
 ; M_assign takes a varriable value and state and returns the state with the varriable is assigned the value given 
     
 (define M_assign
   (lambda (varname value s)
     (replace-value varname value s)))
-        
 
+(interpret "test/1.txt")
+(interpret "test/2.txt")
+(interpret "test/3.txt")
+(interpret "test/4.txt")
+(interpret "test/5.txt")
+(interpret "test/6.txt")
+(interpret "test/7.txt")
+(interpret "test/8.txt")
+(interpret "test/9.txt")
+(interpret "test/10.txt")
+; (interpret "test/11.txt")
+; (interpret "test/12.txt")
+; (interpret "test/13.txt")
+; (interpret "test/14.txt")
+(interpret "test/15.txt")
+(interpret "test/16.txt")
+(interpret "test/17.txt")
+(interpret "test/18.txt")
+(interpret "test/19.txt")
+(interpret "test/20.txt")
+(interpret "test/21.txt")
+(interpret "test/22.txt")
+(interpret "test/23.txt")
+(interpret "test/24.txt")
+(interpret "test/25.txt")
+(interpret "test/26.txt")
+(interpret "test/27.txt")
+(interpret "test/28.txt")

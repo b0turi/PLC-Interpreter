@@ -9,10 +9,28 @@
 ; lookup - given a variable name and a state, check if that variable is defined in that state. Return its value or 'varNotFound if the variable doesn't exist in the state
 (define lookup
   (lambda (varname s)
+    (lookup-cps varname (car s) (cadr s) (lambda (v) v))))
+
+(define lookup-cps
+  (lambda (name namelis valuelis return)
     (cond
-      ((emptystate? s) 'varNotFound)
-      ((eq? varname (next-varname s)) (next-varvalue s))
-      (else (lookup varname (pop-state s))))))
+      ((null? namelis) (error "using before declaring"))
+      ((and (eq? name (car namelis)) (eq? 'null (car valuelis))) (error "using before assigning"))
+      ((and (eq? name (car namelis)) (eq? #t (car valuelis))) (return 'true))
+      ((and (eq? name (car namelis)) (eq? #f (car valuelis))) (return 'false))
+      ((eq? name (car namelis)) (return (car valuelis)))
+      (else (lookup-cps name (cdr namelis) (cdr valuelis) return)))))
+
+(define exist?
+  (lambda (varname s)
+    (exist-cps varname (car s) (lambda (v) v))))
+
+(define exist-cps
+  (lambda (name namelis return)
+    (cond
+      ((null? namelis) (return #f))
+      ((eq? name (car namelis)) (return #t))
+      (else (exist-cps name (cdr namelis) return)))))
 
 (define return (lambda (v) (cadr v)))
 
@@ -63,30 +81,9 @@
   (lambda (lis)
     (cdr lis)))
 
-(define var? (lambda (v s) (not (eq? (lookup v s) 'varNotFound))))
-
 (define var-name
   (lambda (stmt)
     (cadr stmt)))
-
-; next-varname: given a state s, get the name of the next variable in the state
-(define next-varname
-  (lambda (s)
-    (if (null? (car s))
-        '()
-        (caar s))))
-
-; next-varvalue: given a state s, get the value of the next variable in the state
-(define next-varvalue
-  (lambda (s)
-    (if (null? (cadr s))
-        '()
-        (caadr s))))
-
-; pop-state: given a state s, return the state with the first element of the two sublists removed
-(define pop-state
-  (lambda (s)
-    (list (cdar s) (cdadr s))))
 
 ; insert-state: add a variable with a given varname and value to a given state s, and return the new state
 (define insert-var
@@ -96,10 +93,14 @@
 ; replace-value: given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
 (define replace-value
   (lambda (varname value s)
+    (replaceval-cps varname value (car s) (cadr s) (lambda (l1 l2) (list l1 l2)))))
+
+(define replaceval-cps
+  (lambda (varname value namelis valuelis return)
     (cond
-      ((emptystate? s) (error 'varNotFound))
-      ((equal? varname (next-varname s)) (list (car s) (cons value (cdadr s))))
-      (else (replace-value varname value (pop-state s))))))
+      ((null? namelis) (error "using before declaring"))
+      ((equal? varname (car namelis)) (return namelis (cons value (cdr valuelis))))
+      (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))))))))
 
 (define assignment
   (lambda (stmt)
