@@ -37,15 +37,15 @@
       ((not (exp? stmt)) s)
 
       ; Check if the statement reassigns or returns a value 
-      ((eq? (operator stmt) 'return) (M_assign 'return (M_value (return stmt) s) (M_state (return stmt) s)))
-      ((eq? (operator stmt) '=) (M_assign (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
+      ((eq? (operator stmt) 'return) (M_state_assign 'return (M_value (return stmt) s) (M_state (return stmt) s)))
+      ((eq? (operator stmt) '=) (M_state_assign (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
       
       ; Check if the statement branches 
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s))
       ((eq? (operator stmt) 'if) (M_state_if (condition stmt) (then stmt) (else stmt) s))
 
       ; Check if the statement creates a new variable
-      ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
+      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
 
       ; Check if the statement is another kind of expression
       ((single_value? stmt) (M_state (operand1 stmt) s))
@@ -103,16 +103,16 @@
       (M_state_while condition body-statement (M_state body-statement (M_state condition s)))
       (M_state condition s))))
 
-; M_assign
+; M_state_assign
 ; Given a variable name, value, and a state, update the state so
 ; that the value of the variable of the given name is the given value
-(define M_assign
+(define M_state_assign
   (lambda (varname value s)
     (replace-value varname value s)))
 
 
 ; Add: takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
-(define add
+(define M_state_declare
   (lambda (varname value s)
     (cond
       ((eq? varname 'return) (error "Name Reserved"))
