@@ -74,7 +74,7 @@
 (define M_boolean
   (lambda (b-stmt s)
     (cond
-      ((exp? stmt) (M_evaluate b-stmt s))
+      ((exp? b-stmt) (M_evaluate b-stmt s))
       ((boolean? b-stmt) b-stmt)
       ((eq? b-stmt 'true) #t)
       ((eq? b-stmt 'false) #f)
