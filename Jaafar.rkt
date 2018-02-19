@@ -51,14 +51,9 @@
       ; Check if the statement creates a new variable
       ((eq? (operator stmt) 'var) (add (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
 
-      ; Check if the statement is a unary expression
-      ((unary? stmt) (M_state (operand1 stmt) s))
-      ((eq? (operator stmt) '!) (M_state (operand1 stmt) s))
-
-      ; Check if the statement is a binary expression 
-      ((math_operator? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s)))
-      ((comp_operator? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s)))
-      ((bool_operator? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s)))
+      ; Check if the statement is another kind of expression
+      ((single_value? stmt) (M_state (operand1 stmt) s))
+      ((dual_value? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s)))
       (else s))))
 
 
@@ -91,23 +86,23 @@
 (define M_evaluate
   (lambda (exp s)
     (cond
-      ((unary? exp) (M_value (* (M_value (operand1 exp) s) -1) s))
+      ((unary? exp) (- 0 (M_value (operand1 exp) s)))
       ((eq? (operator exp) '=) (M_value (assignment exp) (M_state (assignment exp) s)))
-      ((eq? (operator exp) '+) (M_value (+ (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '-) (M_value (- (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '*) (M_value (* (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '/) (M_value (quotient (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '%) (M_value (remainder (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '==) (M_boolean (= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '!=) (M_boolean (not (= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))) s))
-      ((eq? (operator exp) '<) (M_boolean (< (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '>) (M_boolean (> (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '<=) (M_boolean (<= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '>=) (M_boolean (>= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '>=) (M_boolean (>= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '&&) (M_boolean (and (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '||) (M_boolean (or (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))) s))
-      ((eq? (operator exp) '!) (M_boolean (not (M_boolean (operand1 exp) s)) s)))))
+      ((eq? (operator exp) '+) (+ (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '-) (- (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '*) (* (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '/) (quotient (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '%) (remainder (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '==) (= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '!=) (not (= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator exp) '<) (< (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '>) (> (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '<=) (<= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '>=) (>= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '>=) (>= (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '&&) (and (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '||) (or (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))))
+      ((eq? (operator exp) '!) (not (M_boolean (operand1 exp) s))))))
 
 ; M_state_if
 ; Given a condition, its relevant then and else statements, and a state, return the 
@@ -144,3 +139,29 @@
       ((eq? varname 'return) (error "Name Reserved"))
       ((exist? varname s) (error "Redefining"))
       (else (insert-var varname value s)))))
+
+(and
+(= (interpret "test/1.txt") 150)
+(= (interpret "test/2.txt") -4)
+(= (interpret "test/3.txt") 10)
+(= (interpret "test/4.txt") 16)
+(= (interpret "test/5.txt") 220)
+(= (interpret "test/6.txt") 5)
+(= (interpret "test/7.txt") 6)
+(= (interpret "test/8.txt") 10)
+(= (interpret "test/9.txt") 5)
+(= (interpret "test/10.txt") -39)
+(eq? (interpret "test/15.txt") 'true)
+(= (interpret "test/16.txt") 100)
+(eq? (interpret "test/17.txt") 'false)
+(eq? (interpret "test/18.txt") 'true)
+(= (interpret "test/19.txt") 128)
+(= (interpret "test/20.txt") 12)
+(= (interpret "test/21.txt") 30)
+(= (interpret "test/22.txt") 11)
+(= (interpret "test/23.txt") 1106)
+(= (interpret "test/24.txt") 12)
+(= (interpret "test/25.txt") 16)
+(= (interpret "test/26.txt") 72)
+(= (interpret "test/27.txt") 21)
+(= (interpret "test/28.txt") 164))

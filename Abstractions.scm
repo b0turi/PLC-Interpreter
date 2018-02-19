@@ -70,8 +70,7 @@
 (define unary?
   (lambda (stmt)
     (and (equal? (car stmt) '-) (null? (cddr stmt)))))
-
-
+;======== IF ========
 (define then
   (lambda (stmt)
     (caddr stmt)))
@@ -119,38 +118,29 @@
         'null
         (caddr stmt))))
 
-    ; Checks if
-(define math_operator?
-  (lambda (op)
-    (if (null? op)
-        (error 'nothingFound)
-        (or
-         (eq? '+ op)
-         (eq? '- op)
-         (eq? '* op)
-         (eq? '/ op)
-         (eq? '% op)))))
 
-(define comp_operator?
-  (lambda (op)
-    (if (null? op)
-        (error 'nothingFound)
-        (or
-          (eq? '== op)
-          (eq? '!= op)
-          (eq? '< op)
-          (eq? '> op)
-          (eq? '<= op)
-          (eq? '>= op)))))
+(define single_value?
+  (lambda (stmt)
+    (or
+     (eq? '! (operator stmt))
+     (unary? stmt))))
 
-(define bool_operator?
+(define dual_value?
   (lambda (op)
-    (if (null? op)
-        (error 'nothingFound)
-        (or
-         (eq? '&& op)
-         (eq? '|| op)
-         (eq? '! op)))))
+    (or
+     (eq? '+ op)
+     (eq? '- op)
+     (eq? '* op)
+     (eq? '/ op)
+     (eq? '% op)
+     (eq? '== op)
+     (eq? '!= op)
+     (eq? '< op)
+     (eq? '> op)
+     (eq? '<= op)
+     (eq? '>= op)
+     (eq? '&& op)
+     (eq? '|| op))))
 
 ; check if a value is the atom 'null
 (define null_value?
