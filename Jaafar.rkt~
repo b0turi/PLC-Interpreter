@@ -4,8 +4,8 @@
 ;
 ; Group 8
 ; Jaafar Bennani
-; Alex Hemm
 ; Kyle Thompson
+; Alex Hemm
 ; ==========================================
 
 ; Abstraction methods were placed in a separate file to improve readability
@@ -32,6 +32,7 @@
 
 ; M_state
 ; Given a statement and a state, evaluate the statement and return the new state
+
 (define M_state
   (lambda (stmt s)
     (cond
@@ -58,6 +59,7 @@
 
 ; M_value
 ; Given a statement and a state, retrieve the value returned by the statement
+
 (define M_value
   (lambda (stmt s)
     (cond
@@ -68,6 +70,7 @@
 
 ; M_boolean
 ; Given a boolean statement and a state, return the boolean value of the statement
+
 (define M_boolean
   (lambda (b-stmt s)
     (cond
@@ -79,6 +82,7 @@
 
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state
+
 (define M_evaluate
   (lambda (exp s)
     (cond
@@ -92,6 +96,7 @@
 ; M_state_if
 ; Given a condition, its relevant then and else statements, and a state, return the 
 ; new state with the relevant statement evaluated, based on the condition
+
 (define M_state_if
   (lambda (condition then-statement else-statement s)
     (if (M_boolean condition s)
@@ -100,6 +105,7 @@
 
 ; M_state_while
 ; Given a condition, body, and state, recursively update the state until the condition is met
+
 (define M_state_while
   (lambda (condition body-statement s)
     (if (M_boolean condition s)
@@ -109,6 +115,7 @@
 ; M_assign
 ; Given a variable name, value, and a state, update the state so
 ; that the value of the variable of the given name is the given value
+    
 (define M_assign
   (lambda (varname value s)
     (replace-value varname value s)))

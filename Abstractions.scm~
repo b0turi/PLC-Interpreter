@@ -1,18 +1,11 @@
-; ==========================================
-; Interpreter, Part 1 - Abstractions
-; EECS 345 - Programming Language Concepts
-;
-; Group 8
-; Jaafar Bennani
-; Alex Hemm
-; Kyle Thompson
-; ==========================================
-
 #lang racket
 (provide (all-defined-out))
 
 
-; ===== Lookup =====
+;=================================================
+; Abstractions
+;=================================================
+
 ; lookup - given a variable name and a state, check if that variable is defined in that state. Return its value or 'varNotFound if the variable doesn't exist in the state
 (define lookup
   (lambda (varname s)
@@ -35,8 +28,6 @@
         (else value)))
      (lookup varname s))))
 
-; ===== Exist? =====
-
 (define exist?
   (lambda (varname s)
     (exist-cps varname (car s) (lambda (v) v))))
@@ -47,8 +38,6 @@
       ((null? namelis) (return #f))
       ((eq? name (car namelis)) (return #t))
       (else (exist-cps name (cdr namelis) return)))))
-
-; ===== =====
 
 (define return (lambda (v) (cadr v)))
 
@@ -78,6 +67,9 @@
   (lambda (stmt)
     (caddr stmt)))
 
+(define unary?
+  (lambda (stmt)
+    (and (equal? (car stmt) '-) (null? (cddr stmt)))))
 ;======== IF ========
 (define then
   (lambda (stmt)
@@ -126,17 +118,29 @@
         'null
         (caddr stmt))))
 
-(define unary?
-  (lambda (stmt)
-    (and (equal? (car stmt) '-) (null? (cddr stmt)))))
 
 (define single_value?
   (lambda (stmt)
-    (or (eq? '! (operator stmt)) (unary? stmt))))
+    (or
+     (eq? '! (operator stmt))
+     (unary? stmt))))
 
 (define dual_value?
   (lambda (op)
-    (or (value_op? op) (bool_op? op))))
+    (or
+     (eq? '+ op)
+     (eq? '- op)
+     (eq? '* op)
+     (eq? '/ op)
+     (eq? '% op)
+     (eq? '== op)
+     (eq? '!= op)
+     (eq? '< op)
+     (eq? '> op)
+     (eq? '<= op)
+     (eq? '>= op)
+     (eq? '&& op)
+     (eq? '|| op))))
 
 (define value_op?
   (lambda (op)
@@ -155,7 +159,9 @@
 
 (define bool_op?
   (lambda (op)
-    (or (eq? '&& op) (eq? '|| op))))
+    (or
+     (eq? '&& op)
+     (eq? '|| op))))
 
 (define operation
   (lambda (op)
