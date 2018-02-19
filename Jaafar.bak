@@ -63,24 +63,12 @@
   (lambda (varname value s)
     (cond
       ((eq? varname 'return) (error 'nameReserved))
-      ((
-      ())))
+      ((lookup)))))
 
 ; M_assign takes a varriable value and state and returns the state with the varriable is assigned the value given 
 (define M_assign
-  (lambda (varname value s)
-    (cond
-      ((eq?
+  (lambda 
 
-; lookup - given a variable name and a state, check if that variable is defined in that state. Return its value or 'varNotFound if the variable doesn't exist in the state
-(define lookup
-  (lambda (varname s)
-    (cond
-      ((null? (next-varname s)) 'varNotFound)
-      ((eq? varname (next-varname s)) (next-varvalue s))
-      (else (lookup varname (pop-state s))))))
-        
-      
 ;=================================================
 ; Abstractions
 ;=================================================
@@ -103,6 +91,7 @@
   (lambda (stmt)
     (caddr stmt)))
 
+
 (define then
   (lambda (stmt)
     (caddr stmt)))
@@ -119,25 +108,6 @@
   (lambda (stmt)
     (cadr stmt)))
 
-; next-varname: given a state s, get the name of the next variable in the state
-(define next-varname
-  (lambda (s)
-    (if (null? (car s))
-        '()
-        (caar s))))
-
-; next-varvalue: given a state s, get the value of the next variable in the state
-(define next-varvalue
-  (lambda (s)
-    (if (null? (car s))
-        '()
-        (cadr s))))
-        
-
-; pop-state: given a state s, return the state with the first element of the two sublists removed
-(define pop-state
-  (lambda (s)
-    (cons (cdar s) (cons (cddr s) '()))))
 
 (define assignment
   (lambda (stmt)
@@ -177,13 +147,6 @@
       (eq? '&& (op))
       (eq? '|| (op))
       (eq? '! (op))))))
-
-; check if a value is the atom 'null
-(define null_value?
-  (lambda (x)
-    (if (eq? 'null x)
-        #t
-        #f)))
 
 ; Checks whether or not there is an else statement
 
