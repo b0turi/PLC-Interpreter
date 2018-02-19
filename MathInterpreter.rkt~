@@ -25,22 +25,11 @@
 
 ; Mathematical operations
 
-(define evaluate
+(define math
   (lambda (stmt)
-    (cond
+    (if
      ((null? stmt) (error 'no statement found))
-     ((math_operator? (operator stmt)) math_eval (operator stmt) (operand1 stmt) (operand2 stmt))
-     ((comp_operator? (operator stmt)) 
-     )))
-
-(define math_eval
-  (lambda (oper op1 op2)
-    (oper op1 op2)))
-
-(define comp_eval
-  (lambda (oper op1 op2)
-    
-     
+     ((math_operator? (operator stmt)))
      
 
 
