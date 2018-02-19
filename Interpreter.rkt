@@ -17,7 +17,7 @@
 (define interpret
   (lambda (filename)
      ; The initial state contains the special variable return with a default value of null
-    (lookup 'return (M_state_list (parser filename) '((return) (null)))))) 
+    (lookup (returnvar) (M_state_list (parser filename) (initstate))))) 
 
 ; M_state_list
 ; Given a list of statements and a state, evaluate each line with M_state and return the state
@@ -37,7 +37,7 @@
       ((not (exp? stmt)) s)
 
       ; Check if the statement reassigns or returns a value 
-      ((eq? (operator stmt) 'return) (M_state_assign 'return (M_value (return stmt) s) (M_state (return stmt) s)))
+      ((eq? (operator stmt) 'return) (M_state_assign (returnvar) (M_value (return stmt) s) (M_state (return stmt) s)))
       ((eq? (operator stmt) '=) (M_state_assign (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
       
       ; Check if the statement branches 
@@ -59,7 +59,7 @@
   (lambda (stmt s)
     (cond
       ((exp? stmt) (M_evaluate stmt s))
-      ((eq? stmt 'null) 'null)
+      ((null_value? stmt) (nullvalue))
       ((number? stmt) stmt)
       (else (lookup stmt s)))))
 
@@ -70,8 +70,8 @@
     (cond
       ((exp? b-stmt) (M_evaluate b-stmt s))
       ((boolean? b-stmt) b-stmt)
-      ((eq? b-stmt 'true) #t)
-      ((eq? b-stmt 'false) #f)
+      ((eq? b-stmt (truevalue)) #t)
+      ((eq? b-stmt (falsevalue)) #f)
       (else (bool-lookup b-stmt s)))))
 
 ; M_evaluate
@@ -111,10 +111,10 @@
     (replace-value varname value s)))
 
 
-; Add: takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
+; M_state_declare takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
 (define M_state_declare
   (lambda (varname value s)
     (cond
-      ((eq? varname 'return) (error "Name Reserved"))
+      ((eq? varname (returnvar)) (error "Name Reserved"))
       ((exist? varname s) (error "Redefining"))
       (else (insert-var varname value s)))))

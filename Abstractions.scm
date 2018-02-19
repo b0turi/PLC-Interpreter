@@ -31,13 +31,13 @@
 
 ; bool-lookup
 ; An extention of lookup to handle boolean values and ensure that boolean
-; literals are returned where the atoms 'true and 'false are stored
+; literals are returned where the predefined values of true and false are stored
 (define bool-lookup
   (lambda (varname s)
     ((lambda (value)
       (cond
-        ((eq? value 'true) #t)
-        ((eq? value 'false) #f)
+        ((eq? value (truevalue)) #t)
+        ((eq? value (falsevalue)) #f)
         (else value)))
      (lookup varname s))))
 
@@ -127,19 +127,13 @@
 ; accounting for boolean literals, and return the new state with the variable added
 (define insert-var
   (lambda (varname value s)
-    (cond
-      ((eq? value #t) (list (cons varname (car s)) (cons 'true (cadr s))))
-      ((eq? value #f) (list (cons varname (car s)) (cons 'false (cadr s))))
-      (else (list (cons varname (car s)) (cons value (cadr s)))))))
+    (list (cons varname (car s)) (cons (realvalue value) (cadr s)))))
 
 ; replace-value
 ; Given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
 (define replace-value
   (lambda (varname value s)
-    (cond
-      ((eq? value #t) (replaceval-cps varname 'true (car s) (cadr s) (lambda (l1 l2) (list l1 l2))))
-      ((eq? value #f) (replaceval-cps varname 'false (car s) (cadr s) (lambda (l1 l2) (list l1 l2))))
-      (else (replaceval-cps varname value (car s) (cadr s) (lambda (l1 l2) (list l1 l2)))))))
+    (replaceval-cps varname (realvalue value) (car s) (cadr s) (lambda (l1 l2) (list l1 l2)))))
 
 ; tail recursive helper for replace-value
 (define replaceval-cps
@@ -148,7 +142,6 @@
       ((null? namelis) (error "using before declaring"))
       ((equal? varname (car namelis)) (return namelis (cons value (cdr valuelis))))
       (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))))))))
-
 
 ; ===== Miscellaneous =====
 
@@ -167,35 +160,48 @@
     (cadr stmt)))
 
 ; assignment
-; returns the assignment expression for a variable declaration or assignment, 'null if there isn't one
+; Given a statement known to be an assignment to a variable,
+; retrieve the value that is to be assigned to the variable
 (define assignment
   (lambda (stmt)
     (if (null? (cddr stmt))
         'null
         (caddr stmt))))
 
+; realvalue
+; Given a value, check if the value is a boolean literal, and return
+; the equivalent atom for printing, or return the original value if not
+(define realvalue
+  (lambda (v)
+    (cond
+      ((eq? v #t) (truevalue))
+      ((eq? v #f) (falsevalue))
+      (else v))))
+
 ; ===== OPERATIONS =====
 
-; unary-;
-; takes in a statment, returns true if the operation is the unary -
+; unary-?
+; Given a statement, return whether the statement is a unary expression with '- as the operator
+; as a boolean value
 (define unary-?
   (lambda (stmt)
     (and (equal? (car stmt) '-) (null? (cddr stmt)))))
 
 ; single_value?
-; takes in a statement, returns true if the operation uses only one value
+; Given a statement, return a boolean value as to whether the statement has only one operand
 (define single_value?
   (lambda (stmt)
     (or (eq? '! (operator stmt)) (unary-? stmt))))
 
 ; dual_value?
-; takes in an operator, returns true if the operator takes 2 values
+; Given a statement, return a boolean value as to whether the statement has two operands
 (define dual_value?
   (lambda (op)
     (or (value_op? op) (bool_op? op))))
 
 ; value_op?
-; takes in an operator, returns true if the operator operates on two numbers
+; Given an operator, return a boolean value as to whether the operator is a value operator,
+; or, an operator that requires two operands
 (define value_op?
   (lambda (op)
     (or
@@ -212,16 +218,18 @@
      (eq? '>= op))))
 
 ; bool_op?
-; takes in an operator, returns true if the operator operates on two booleans
+; Given an operator, return a boolean value as to whether the operator is a boolean operator,
+; or, an operator that can only operate on two booleans
 (define bool_op?
   (lambda (op)
     (or (eq? '&& op) (eq? '|| op))))
 
 ; operation
-; takes in a dual value and two values, returns the appropreate result for the operation given 
+; Given an operator and two operands, return the result of the operation on the two operands
 (define operation
   (lambda (op v1 v2)
     (cond
+      ; Value operators
       ((eq? '+ op) (+ v1 v2))
       ((eq? '- op) (- v1 v2))
       ((eq? '* op) (* v1 v2))
@@ -233,16 +241,42 @@
       ((eq? '> op) (> v1 v2))
       ((eq? '<= op) (<= v1 v2))
       ((eq? '>= op) (>= v1 v2))
+
+      ; Boolean operators
       ((eq? '&& op) (and v1 v2))
       ((eq? '|| op) (or v1 v2))
       (else (error "Operator not valid")))))
-      
-  
 
-; check if a value is the atom 'null
+; null_value?
+; Given a value, return a boolean value as to whether the value is the predefined null value
 (define null_value?
-  (lambda (x)
-    (eq? 'null x)))
+  (lambda (v)
+    (eq? v (nullvalue))))
 
-; exp?: is the value an expression
-(define exp? (lambda (v) (pair? v)))
+; exp?
+; Given an atom, return a boolean value as to whether the given atom is a pair, or, can be
+; interpreted as an expression
+(define exp?
+  (lambda (v)
+    (pair? v)))
+
+; ===== Predefined values =====
+(define returnvar
+  (lambda ()
+    'return))
+
+(define nullvalue
+  (lambda ()
+    'null))
+
+(define truevalue
+  (lambda ()
+    'true))
+
+(define falsevalue
+  (lambda ()
+    'false))
+
+(define initstate
+  (lambda ()
+    (list (list (returnvar)) (list nullvalue))))
