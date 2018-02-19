@@ -33,6 +33,24 @@
       (else (error 'invalidValue)))))
 
 ; M_evaluate
+(define M_evaluate
+  (lambda (exp s)
+    (cond
+      ((eq? (operator stmt) '+) (M_value (+ (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '-) (M_value (- (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '*) (M_value (* (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '/) (M_value (quotient (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '%) (M_value (remainder (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '==) (M_boolean (= (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '!=) (M_boolean (not (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '<) (M_boolean (< (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '>) (M_boolean (> (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '<=) (M_boolean (<= (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '>=) (M_boolean (>= (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '>=) (M_boolean (>= (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '&&) (M_boolean (and (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '||) (M_boolean (or (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s)))))
+      ((eq? (operator stmt) '!) (M_boolean (not (M_boolean (operand1 exp) s)))))))
 
 ; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
 (define M_boolean
@@ -67,6 +85,7 @@
       (else (error 'varialeAlreadyExists)))))
 
 ; M_assign takes a varriable value and state and returns the state with the varriable is assigned the value given 
+    
 (define M_assign
   (lambda (varname value s)
     (if (eq? (lookup varname s) value)
@@ -93,6 +112,14 @@
       ((null? stmt) (error 'thereIsNoStatement))
       ((list? stmt) (car stmt))
       (else (error 'invalidStatement)))))
+
+(define operand1
+  (lambda (math_stmt)
+    (cadr math_stmt)))
+
+(define operand2
+  (lambda (math_stmt)
+    (caddr math_stmt)))
 
 ; condition: take in an if or while statement containing a condition and returns the condition
 (define condition

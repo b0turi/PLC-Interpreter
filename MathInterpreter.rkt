@@ -29,8 +29,7 @@
   (lambda (stmt)
     (cond
      ((null? stmt) (error 'no statement found))
-     ((math_operator? (operator stmt)) math_eval (operator stmt) (operand1 stmt) (operand2 stmt))
-     ((comp_operator? (operator stmt)) 
+     ((math_operator? (operator stmt)) (math_eval (operator stmt) (operand1 stmt) (operand2 stmt)))
      )))
 
 (define math_eval
