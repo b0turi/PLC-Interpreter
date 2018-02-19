@@ -14,6 +14,7 @@
 
 ; interpret
 ; Given a filename of Java/C-like code, use simpleParser to parse the file and then get the value that block of code returns
+
 (define interpret
   (lambda (filename)
      ; The initial state contains the special variable return with a default value of null
@@ -22,6 +23,7 @@
 ; M_state_list
 ; Given a list of statements and a state, evaluate each line with M_state and return the state
 ; after each line has been evaluated
+
 (define M_state_list
   (lambda (stmt-lis s)
     (cond
@@ -33,10 +35,11 @@
 (define M_state
   (lambda (stmt s)
     (cond
-      ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
+      ; Ensure that the statement can be evaluated
+      ((null? stmt) s)
       ((not (exp? stmt)) s)
 
-      ; Check if the statement reassigns or returns a value 
+      ; Check if the statement reassigns a value 
       ((eq? (operator stmt) 'return) (M_assign 'return (M_value (return stmt) s) (M_state (return stmt) s)))
       ((eq? (operator stmt) '=) (M_assign (var-name stmt) (M_value (assignment stmt) s) (M_state (assignment stmt) s)))
       
@@ -79,11 +82,11 @@
 (define M_evaluate
   (lambda (exp s)
     (cond
-      ((unary-? exp) (- 0 (M_value (operand1 exp) s)))
+      ((unary? exp) (- 0 (M_value (operand1 exp) s)))
       ((eq? (operator exp) '!) (not (M_boolean (operand1 exp) s)))
       ((eq? (operator exp) '=) (M_value (assignment exp) (M_state (assignment exp) s)))
-      ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
-      ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))))
+      ((value_op? (operator exp)) ((operation (operator exp)) (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
+      ((bool_op? (operator exp)) ((operation (operator exp)) (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))))
       (else (error "Operator not valid")))))
 
 ; M_state_if
