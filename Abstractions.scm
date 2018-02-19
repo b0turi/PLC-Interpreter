@@ -6,13 +6,6 @@
 ; Abstractions
 ;=================================================
 
-(define bool?
-  (lambda (stmt)
-    (or
-     (boolean? stmt)
-     (eq? stmt 'true)
-     (eq? stmt 'false))))
-
 ; lookup - given a variable name and a state, check if that variable is defined in that state. Return its value or 'varNotFound if the variable doesn't exist in the state
 (define lookup
   (lambda (varname s)
@@ -47,8 +40,6 @@
       (else (exist-cps name (cdr namelis) return)))))
 
 (define return (lambda (v) (cadr v)))
-
-(define emptystate? (lambda (s) (equal? '(()()) s)))
 
 ; Operator: takes in a statement and returns the operator
 (define operator

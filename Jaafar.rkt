@@ -4,7 +4,7 @@
 ; interpret takes a filename and returns a value from return
 (define interpret
   (lambda (filename)
-    (lookup 'return (M_state_list (parser filename) '((return)(null)))))) ; first state passed is the empty state with only the special return varrible with no assigned value (null)
+    (lookup 'return (M_state_list (parser filename) '((return) (null)))))) ; first state passed is the empty state with only the special return varrible with no assigned value (null)
 
 ; M_state_list takes in a statement list stmt-lis and a state s and returns a state 
 (define M_state_list
@@ -39,8 +39,7 @@
       ((exp? stmt) (M_evaluate stmt s))
       ((eq? stmt 'null) 'null)
       ((number? stmt) stmt)
-      ((exist? stmt s) (lookup stmt s))
-      (else (error 'invalidValue)))))
+      (else (lookup stmt s)))))
 
 ; M_boolean takes in a conditional statement and a state and returns true if the statement is true, and false otherwhise
 (define M_boolean
@@ -50,8 +49,7 @@
       ((boolean? stmt) stmt)
       ((eq? stmt 'true) #t)
       ((eq? stmt 'false) #f)
-      ((exist? stmt s) (bool-lookup stmt s))
-      (else (error 'invalidBoolean)))))
+      (else (bool-lookup stmt s)))))
 
 ; M_evaluate
 (define M_evaluate
@@ -106,32 +104,3 @@
 (define M_assign
   (lambda (varname value s)
     (replace-value varname value s)))
-
-(interpret "test/1.txt")
-(interpret "test/2.txt")
-(interpret "test/3.txt")
-(interpret "test/4.txt")
-(interpret "test/5.txt")
-(interpret "test/6.txt")
-(interpret "test/7.txt")
-(interpret "test/8.txt")
-(interpret "test/9.txt")
-(interpret "test/10.txt")
-; (interpret "test/11.txt")
-; (interpret "test/12.txt")
-; (interpret "test/13.txt")
-; (interpret "test/14.txt")
-(interpret "test/15.txt")
-(interpret "test/16.txt")
-(interpret "test/17.txt")
-(interpret "test/18.txt")
-(interpret "test/19.txt")
-(interpret "test/20.txt")
-(interpret "test/21.txt")
-(interpret "test/22.txt")
-(interpret "test/23.txt")
-(interpret "test/24.txt")
-(interpret "test/25.txt")
-(interpret "test/26.txt")
-(interpret "test/27.txt")
-(interpret "test/28.txt")
