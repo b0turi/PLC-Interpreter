@@ -86,7 +86,7 @@
       ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state (operand1 exp) s))))
       ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state (operand1 exp) s))))
       (else (error "Expression id not valid")))))
- 
+
 ; M_state_if
 ; Given a condition, its relevant then and else statements, and a state, return the 
 ; new state with the relevant statement evaluated, based on the condition
