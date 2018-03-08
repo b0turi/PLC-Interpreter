@@ -160,17 +160,35 @@
 ; exist?
 ; takes in a variable name and a list, returns 
 (define exist?
-  (lambda (varname s)
-    (exist?-cps varname (car s) (lambda (v) v))))
+  (lambda (name s)
+    (exist?-cps-layer name s (lambda (v) v))))
+
+(define exist?-cps-layer
+  (lambda (name s return)
+    (cond
+      ((null? s) (return #f))
+      ((null? (exist?-cps name (caar s) return)) (exist?-cps-layer name (cdr s) return))
+      (else (exist?-cps name (caar s) return)))))
 
 ; exist?-cps
 ; A tail recursive helper for exist?
 (define exist?-cps
   (lambda (name namelis return)
     (cond
-      ((null? namelis) (return #f))
+      ((null? namelis) (return '()))
       ((eq? name (car namelis)) (return #t))
       (else (exist?-cps name (cdr namelis) return)))))
+
+(define exist-top?
+  (lambda (varname s)
+    (exist-top?-cps varname (caar s) (lambda (v) v))))
+
+(define exist-top?-cps
+  (lambda (name namelis return)
+    (cond
+      ((null? namelis) (return #f))
+      ((eq? name (car namelis)) (return #t))
+      (else (exist-top?-cps name (cdr namelis) return)))))
 
 ; ===== Miscellaneous =====
 
