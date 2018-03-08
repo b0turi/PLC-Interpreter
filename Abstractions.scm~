@@ -71,7 +71,7 @@
 ; block-body
 (define block-body
   (lambda (stmt)
-    (cdr stmt)))
+    (cadr stmt)))
 
 ; ===== STATE =====
 
@@ -293,14 +293,3 @@
     '(()())))
 
 (define returnvalue (lambda (v) v))
-
-(define goto-setup
-  (lambda (name function goto)
-    (lambda (f v)
-      (if (eq? f name)
-          (function v)
-          (goto f v)))))
-
-(define gotoerror
-  (lambda (a b)
-    (error "error")))

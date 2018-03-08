@@ -19,7 +19,7 @@
     (call/cc
      (lambda (return)
        ; The initial state is empty
-       (M_state_list (parser filename) (initstate) (goto-setup 'return return null))))))
+       (M_state_list (parser filename) (initstate) (goto-setup 'return return gotoerror))))))
 
 ; M_state_list
 ; Given a list of statements and a state, evaluate each line with M_state and return the state
@@ -40,13 +40,16 @@
 
       ; Check if the statement returns a value 
       ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) s))))
+
+      ((eq? (operator stmt) 'break) (goto 'break s))
       
       ; Check if the statement branches 
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s goto))
       ((eq? (operator stmt) 'if) (M_state_if (condition stmt) (then stmt) (else stmt) s goto))
 
       ; Check if the statement is a block of code, defined by "begin" in the parser
-      ((eq? (operator stmt) 'begin) (remove_layer (M_state_block (block-body stmt) (add_layer s) goto)))
+      ;((eq? (operator stmt) 'begin) (remove_layer (M_state_block (block-body stmt) (add_layer s) goto)))
+      ((eq? (operator stmt) 'begin) (M_state_block (block-body stmt) s goto))
       
       (else (M_state_side_effect stmt s)))))
 
@@ -139,9 +142,3 @@
     (call/cc
      (lambda (break)
        (M_state_list stmt-lis s (goto-setup 'break break goto))))))
-
-(define goto-setup
-  (lambda (name function goto)
-    (lambda (f v) (if (eq? f name)
-                      (function v)
-                      (goto f v)))))
