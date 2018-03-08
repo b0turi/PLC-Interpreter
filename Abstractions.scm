@@ -80,30 +80,37 @@
 ; accounting for boolean literals, and return the new state with the variable added
 (define insert-var
   (lambda (varname value s)
-    (list (cons varname (car s)) (cons (realvalue value) (cadr s)))))
+    (cons (list (cons varname (caar s)) (cons value (cadar s))) (cdr s))))
 
 ; replace-value
 ; Given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
 (define replace-value
   (lambda (varname value s)
-    (replaceval-cps varname (realvalue value) (car s) (cadr s) (lambda (l1 l2) (list l1 l2)))))
+    (replaceval-cps-layers varname value s (lambda (v1 v2) (list v1 v2)))))
+
+(define replaceval-cps-layers
+  (lambda (name value s return)
+    (cond
+      ((null? s) (error "using before declaring"))
+      ((null? (replaceval-cps name (realvalue value) (caar s) (cadar s) return)) (replaceval-cps-layers name value (cdr s) return))
+      (else (replaceval-cps name (realvalue value) (caar s) (cadar s) return)))))
 
 ; tail recursive helper for replace-value
 (define replaceval-cps
   (lambda (varname value namelis valuelis return)
     (cond
-      ((null? namelis) (error "using before declaring"))
+      ((null? namelis) '())
       ((equal? varname (car namelis)) (return namelis (cons value (cdr valuelis))))
       (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))))))))
 
-(define add-state
-  (lambda (newstate s)
-    (cons newstate s)))
-
-(define pop-state
+(define add_layer
   (lambda (s)
-    (if (null? (cdddr s))
-        (error "No substates")
+    (cons '(() ()) s)))
+
+(define remove_layer
+  (lambda (s)
+    (if (null? s)
+        (error "No layers present")
         (cdr s))))
 
 ; ===== Lookup =====
@@ -112,14 +119,21 @@
 ; Throws and appropriate error if the variable doesn't exist in the state or is uninitialized
 (define lookup
   (lambda (varname s)
-    (lookup-cps varname (car s) (cadr s) (lambda (v) v))))
+    (lookup-cps-layers varname s (lambda (v) v))))
 
+(define lookup-cps-layers
+  (lambda (name s return)
+    (cond
+      ((null? s) (error "using before declaring"))
+      ((null? (lookup-cps name (caar s) (cadar s) return)) (lookup-cps-layers name (cdr s) return))
+      (else (lookup-cps name (caar s) (cadar s) return)))))
+  
 ; lookup-cps
 ; A tail recursive helper for lookup
 (define lookup-cps
   (lambda (name namelis valuelis return)
     (cond
-      ((null? namelis) (error "using before declaring"))
+      ((null? namelis) (return '()))
       ((and (eq? name (car namelis)) (null_value? (car valuelis))) (error "using before assigning"))
       ((eq? name (car namelis)) (return (car valuelis)))
       (else (lookup-cps name (cdr namelis) (cdr valuelis) return)))))
@@ -146,17 +160,35 @@
 ; exist?
 ; takes in a variable name and a list, returns 
 (define exist?
-  (lambda (varname s)
-    (exist?-cps varname (car s) (lambda (v) v))))
+  (lambda (name s)
+    (exist?-cps-layer name s (lambda (v) v))))
+
+(define exist?-cps-layer
+  (lambda (name s return)
+    (cond
+      ((null? s) (return #f))
+      ((null? (exist?-cps name (caar s) return)) (exist?-cps-layer name (cdr s) return))
+      (else (exist?-cps name (caar s) return)))))
 
 ; exist?-cps
 ; A tail recursive helper for exist?
 (define exist?-cps
   (lambda (name namelis return)
     (cond
-      ((null? namelis) (return #f))
+      ((null? namelis) (return '()))
       ((eq? name (car namelis)) (return #t))
       (else (exist?-cps name (cdr namelis) return)))))
+
+(define exist-top?
+  (lambda (varname s)
+    (exist-top?-cps varname (caar s) (lambda (v) v))))
+
+(define exist-top?-cps
+  (lambda (name namelis return)
+    (cond
+      ((null? namelis) (return #f))
+      ((eq? name (car namelis)) (return #t))
+      (else (exist-top?-cps name (cdr namelis) return)))))
 
 ; ===== Miscellaneous =====
 
