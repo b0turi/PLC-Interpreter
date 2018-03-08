@@ -1,2 +1,5 @@
-var x = 0;
-return x && true;
+var x;
+var y = x = 6;
+while ((x = x - 1) > 0)
+	y = y * x;
+return y;
