@@ -80,27 +80,34 @@
 ; accounting for boolean literals, and return the new state with the variable added
 (define insert-var
   (lambda (varname value s)
-    (list (cons varname (car s)) (cons (realvalue value) (cadr s)))))
+    (cons (list (cons varname (caar s)) (cons value (cadar s))) (cdr s))))
 
 ; replace-value
 ; Given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
 (define replace-value
   (lambda (varname value s)
-    (replaceval-cps varname (realvalue value) (car s) (cadr s) (lambda (l1 l2) (list l1 l2)))))
+    (replaceval-cps-layers varname value s (lambda (v1 v2) (list v1 v2)))))
+
+(define replaceval-cps-layers
+  (lambda (name value s return)
+    (cond
+      ((null? s) (error "using before declaring"))
+      ((null? (replaceval-cps name (realvalue value) (caar s) (cadar s) return)) (replaceval-cps-layers name value (cdr s) return))
+      (else (replaceval-cps name (realvalue value) (caar s) (cadar s) return)))))
 
 ; tail recursive helper for replace-value
 (define replaceval-cps
   (lambda (varname value namelis valuelis return)
     (cond
-      ((null? namelis) (error "using before declaring"))
+      ((null? namelis) '())
       ((equal? varname (car namelis)) (return namelis (cons value (cdr valuelis))))
       (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))))))))
 
-(define add-layer
+(define add_layer
   (lambda (s)
     (cons '() s)))
 
-(define remove-layer
+(define remove_layer
   (lambda (s)
     (if (null? s)
         (error "No layers present")
