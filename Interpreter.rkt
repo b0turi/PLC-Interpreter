@@ -9,6 +9,9 @@
 ; Kyle Thompson
 ; ==========================================
 
+#lang racket
+(provide (all-defined-out))
+
 (require "simpleParser.scm")
 (require "Abstractions.scm")
 
@@ -88,7 +91,7 @@
       ((exp? b-stmt) (M_evaluate b-stmt s))
       ((boolean? b-stmt) b-stmt)
       ((boolvalue? b-stmt) (boolvalue b-stmt))
-      (else (bool-lookup b-stmt s)))))
+      (else (lookup b-stmt s)))))
 
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state

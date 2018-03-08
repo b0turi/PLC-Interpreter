@@ -128,13 +128,6 @@
       ((eq? name (car namelis)) (return (car valuelis)))
       (else (lookup-cps name (cdr namelis) (cdr valuelis) return break)))))
 
-; bool-lookup
-; An extention of lookup to handle boolean values and ensure that boolean
-; literals are returned where the predefined values of true and false are stored
-(define bool-lookup
-  (lambda (varname s)
-    (boolvalue (lookup varname s))))
-
 (define boolvalue
   (lambda (v)
     (cond
