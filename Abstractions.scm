@@ -86,22 +86,17 @@
 ; Given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
 (define replace-value
   (lambda (varname value s)
-    (replaceval-cps-layers varname value s (lambda (v1 v2) (list v1 v2)))))
-
-(define replaceval-cps-layers
-  (lambda (name value s return)
-    (cond
-      ((null? s) (error "using before declaring"))
-      ((null? (replaceval-cps name (realvalue value) (caar s) (cadar s) return)) (replaceval-cps-layers name value (cdr s) return))
-      (else (replaceval-cps name (realvalue value) (caar s) (cadar s) return)))))
+    (if (null? s)
+        (error "using before declaring")
+        (replaceval-cps varname value (caar s) (cadar s) (lambda (v1 v2) (cons (list v1 v2) (cdr s))) (lambda () (cons (car s) (replace-value varname value (cdr s))))))))
 
 ; tail recursive helper for replace-value
 (define replaceval-cps
-  (lambda (varname value namelis valuelis return)
+  (lambda (varname value namelis valuelis return break)
     (cond
-      ((null? namelis) '())
+      ((null? namelis) (break))
       ((equal? varname (car namelis)) (return namelis (cons value (cdr valuelis))))
-      (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))))))))
+      (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))) break)))))
 
 (define add_layer
   (lambda (s)
@@ -119,24 +114,19 @@
 ; Throws and appropriate error if the variable doesn't exist in the state or is uninitialized
 (define lookup
   (lambda (varname s)
-    (lookup-cps-layers varname s (lambda (v) v))))
-
-(define lookup-cps-layers
-  (lambda (name s return)
-    (cond
-      ((null? s) (error "using before declaring"))
-      ((null? (lookup-cps name (caar s) (cadar s) return)) (lookup-cps-layers name (cdr s) return))
-      (else (lookup-cps name (caar s) (cadar s) return)))))
+    (if (null? s)
+        (error "using before declaring")
+        (lookup-cps varname (caar s) (cadar s) (lambda (v) v) (lambda () (lookup varname (cdr s)))))))
   
 ; lookup-cps
 ; A tail recursive helper for lookup
 (define lookup-cps
-  (lambda (name namelis valuelis return)
+  (lambda (name namelis valuelis return break)
     (cond
-      ((null? namelis) (return '()))
+      ((null? namelis) (break))
       ((and (eq? name (car namelis)) (null_value? (car valuelis))) (error "using before assigning"))
       ((eq? name (car namelis)) (return (car valuelis)))
-      (else (lookup-cps name (cdr namelis) (cdr valuelis) return)))))
+      (else (lookup-cps name (cdr namelis) (cdr valuelis) return break)))))
 
 ; bool-lookup
 ; An extention of lookup to handle boolean values and ensure that boolean
@@ -161,23 +151,18 @@
 ; takes in a variable name and a list, returns 
 (define exist?
   (lambda (name s)
-    (exist?-cps-layer name s (lambda (v) v))))
-
-(define exist?-cps-layer
-  (lambda (name s return)
-    (cond
-      ((null? s) (return #f))
-      ((null? (exist?-cps name (caar s) return)) (exist?-cps-layer name (cdr s) return))
-      (else (exist?-cps name (caar s) return)))))
+    (if (null? s)
+        #f
+        (exist?-cps name (caar s) (lambda (v) v) (lambda () (exist? name (cdr s)))))))
 
 ; exist?-cps
 ; A tail recursive helper for exist?
 (define exist?-cps
-  (lambda (name namelis return)
+  (lambda (name namelis return break)
     (cond
-      ((null? namelis) (return '()))
+      ((null? namelis) (break))
       ((eq? name (car namelis)) (return #t))
-      (else (exist?-cps name (cdr namelis) return)))))
+      (else (exist?-cps name (cdr namelis) return break)))))
 
 (define exist-top?
   (lambda (varname s)
@@ -322,7 +307,7 @@
 
 (define initstate
   (lambda ()
-    '(()())))
+    (add_layer null)))
 
 (define returnvalue (lambda (v) v))
 
@@ -336,3 +321,22 @@
 (define gotoerror
   (lambda (a b)
     (error "error")))
+
+(define initgoto
+    (goto-setup 'throw (lambda (s) (if (number? s) (error (number->string s)) (error s))) gotoerror))
+
+(define block_goto
+  (lambda (goto)
+    (goto-setup 'break (lambda (s) (goto 'break (remove_layer s))) (goto-setup 'continue (lambda (s) (goto 'continue (remove_layer s))) goto))))
+
+(define state-goto?
+  (lambda (op)
+    (or
+      (eq? op 'break)
+      (eq? op 'continue))))
+
+(define value-goto?
+  (lambda (op)
+    (or
+      (eq? op 'return)
+      (eq? op 'throw))))

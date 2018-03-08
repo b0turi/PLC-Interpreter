@@ -1,8 +1,1 @@
-var x;
-{
-x = 2;
-break;
-x = 3;
-}
-break;
-return x;
+throw true;

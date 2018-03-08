@@ -19,7 +19,7 @@
     (call/cc
      (lambda (return)
        ; The initial state is empty
-       (M_state_list (parser filename) (initstate) (goto-setup 'return return gotoerror))))))
+       (M_state_list (parser filename) (initstate) (goto-setup 'return return initgoto))))))
 
 ; M_state_list
 ; Given a list of statements and a state, evaluate each line with M_state and return the state
@@ -38,18 +38,16 @@
       ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
       ((not (exp? stmt)) s)
 
-      ; Check if the statement returns a value 
-      ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) s))))
+      ((value-goto? (operator stmt)) (goto (operator stmt) (realvalue (M_value (return-exp stmt) s))))
 
-      ((eq? (operator stmt) 'break) (goto 'break s))
+      ((state-goto? (operator stmt)) (goto (operator stmt) s))
       
       ; Check if the statement branches 
-      ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s goto))
+      ((eq? (operator stmt) 'while) (M_state_while-start (condition stmt) (body stmt) s goto))
       ((eq? (operator stmt) 'if) (M_state_if (condition stmt) (then stmt) (else stmt) s goto))
 
       ; Check if the statement is a block of code, defined by "begin" in the parser
-      ;((eq? (operator stmt) 'begin) (remove_layer (M_state_block (block-body stmt) (add_layer s) goto)))
-      ((eq? (operator stmt) 'begin) (M_state_block (block-body stmt) s goto))
+      ((eq? (operator stmt) 'begin) (remove_layer (M_state_list (block-body stmt) (add_layer s) (block_goto goto))))
       
       (else (M_state_side_effect stmt s)))))
 
@@ -108,18 +106,30 @@
 ; Given a condition, its relevant then and else statements, and a state, return the 
 ; new state with the relevant statement evaluated, based on the condition
 (define M_state_if
-  (lambda (condition then-statement else-statement s return)
+  (lambda (condition then-statement else-statement s goto)
     (if (M_boolean condition s)
-      (M_state then-statement (M_state_side_effect condition s) return)
-      (M_state else-statement (M_state_side_effect condition s) return))))
+      (M_state then-statement (M_state_side_effect condition s) goto)
+      (M_state else-statement (M_state_side_effect condition s) goto))))
+
+(define M_state_while-start
+  (lambda (condition body-statement s goto)
+    (call/cc
+     (lambda (break)
+       (M_state_while condition body-statement s (goto-setup 'break break goto))))))
 
 ; M_state_while
 ; Given a condition, body, and state, recursively update the state until the condition is met
 (define M_state_while
-  (lambda (condition body-statement s return)
+  (lambda (condition body-statement s goto)
     (if (M_boolean condition s)
-      (M_state_while condition body-statement (M_state body-statement (M_state_side_effect condition s) return) return)
+      (M_state_while condition body-statement (M_state-continue body-statement (M_state_side_effect condition s) goto) goto)
       (M_state_side_effect condition s))))
+
+(define M_state-continue
+  (lambda (stmt s goto)
+    (call/cc
+     (lambda (continue)
+       (M_state stmt s (goto-setup 'continue continue goto))))))
 
 ; M_state_assign
 ; Given a variable name, value, and a state, update the state so
@@ -133,12 +143,5 @@
 (define M_state_declare
   (lambda (varname value s)
     (cond
-      ((exist? varname s) (error "Redefining"))
+      ((exist-top? varname s) (error "Redefining"))
       (else (insert-var varname value s)))))
-
-; M_state_block
-(define M_state_block
-  (lambda (stmt-lis s goto)
-    (call/cc
-     (lambda (break)
-       (M_state_list stmt-lis s (goto-setup 'break break goto))))))
