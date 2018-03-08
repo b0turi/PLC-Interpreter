@@ -105,7 +105,7 @@
 
 (define add_layer
   (lambda (s)
-    (cons '() s)))
+    (cons '(() ()) s)))
 
 (define remove_layer
   (lambda (s)
