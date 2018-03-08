@@ -5,64 +5,12 @@
 #lang racket
 (provide (all-defined-out))
 
-; ===== Lookup =====
-; lookup
-; Given a variable name and a state, check if that variable is defined in that state.
-; Throws and appropriate error if the variable doesn't exist in the state or is uninitialized
-(define lookup
-  (lambda (varname s)
-    (lookup-cps varname (car s) (cadr s) (lambda (v) v))))
-
-; lookup-cps
-; A tail recursive helper for lookup
-(define lookup-cps
-  (lambda (name namelis valuelis return)
-    (cond
-      ((null? namelis) (error "using before declaring"))
-      ((and (eq? name (car namelis)) (null_value? (car valuelis))) (error "using before assigning"))
-      ((eq? name (car namelis)) (return (car valuelis)))
-      (else (lookup-cps name (cdr namelis) (cdr valuelis) return)))))
-
-; bool-lookup
-; An extention of lookup to handle boolean values and ensure that boolean
-; literals are returned where the predefined values of true and false are stored
-(define bool-lookup
-  (lambda (varname s)
-    (boolvalue (lookup varname s))))
-
-(define boolvalue
-  (lambda (v)
-    (cond
-      ((eq? v (truevalue)) #t)
-      ((eq? v (falsevalue)) #f)
-      (else (error "invalid boolean")))))
-
-(define boolvalue?
-  (lambda (v)
-    (or (eq? v (truevalue)) (eq? v (falsevalue)))))
-
-; ===== Exist? =====
-; exist?
-; takes in a variable name and a list, returns 
-(define exist?
-  (lambda (varname s)
-    (exist?-cps varname (car s) (lambda (v) v))))
-
-; exist?-cps
-; A tail recursive helper for exist?
-(define exist?-cps
-  (lambda (name namelis return)
-    (cond
-      ((null? namelis) (return #f))
-      ((eq? name (car namelis)) (return #t))
-      (else (exist?-cps name (cdr namelis) return)))))
-
 ; ===== Function "readers" =====
 
-; return
+; return-exp
 ; Given a statement that is known to be a return statement,
 ; return the value the statement dictates is to be returned
-(define return
+(define return-exp
   (lambda (stmt)
     (cadr stmt)))
 
@@ -122,7 +70,7 @@
 
 ; ===== STATE =====
 
-; insert-state
+; insert-var
 ; Given a variable name, value, and a state, insert the variable with the given value into the state,
 ; accounting for boolean literals, and return the new state with the variable added
 (define insert-var
@@ -142,6 +90,68 @@
       ((null? namelis) (error "using before declaring"))
       ((equal? varname (car namelis)) (return namelis (cons value (cdr valuelis))))
       (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))))))))
+
+(define add-state
+  (lambda (newstate s)
+    (cons newstate s)))
+
+(define pop-state
+  (lambda (s)
+    (if (null? (cdddr s))
+        (error "No substates")
+        (cdr s))))
+
+; ===== Lookup =====
+; lookup
+; Given a variable name and a state, check if that variable is defined in that state.
+; Throws and appropriate error if the variable doesn't exist in the state or is uninitialized
+(define lookup
+  (lambda (varname s)
+    (lookup-cps varname (car s) (cadr s) (lambda (v) v))))
+
+; lookup-cps
+; A tail recursive helper for lookup
+(define lookup-cps
+  (lambda (name namelis valuelis return)
+    (cond
+      ((null? namelis) (error "using before declaring"))
+      ((and (eq? name (car namelis)) (null_value? (car valuelis))) (error "using before assigning"))
+      ((eq? name (car namelis)) (return (car valuelis)))
+      (else (lookup-cps name (cdr namelis) (cdr valuelis) return)))))
+
+; bool-lookup
+; An extention of lookup to handle boolean values and ensure that boolean
+; literals are returned where the predefined values of true and false are stored
+(define bool-lookup
+  (lambda (varname s)
+    (boolvalue (lookup varname s))))
+
+(define boolvalue
+  (lambda (v)
+    (cond
+      ((eq? v (truevalue)) #t)
+      ((eq? v (falsevalue)) #f)
+      (else (error "invalid boolean")))))
+
+(define boolvalue?
+  (lambda (v)
+    (or (eq? v (truevalue)) (eq? v (falsevalue)))))
+
+; ===== Exist? =====
+; exist?
+; takes in a variable name and a list, returns 
+(define exist?
+  (lambda (varname s)
+    (exist?-cps varname (car s) (lambda (v) v))))
+
+; exist?-cps
+; A tail recursive helper for exist?
+(define exist?-cps
+  (lambda (name namelis return)
+    (cond
+      ((null? namelis) (return #f))
+      ((eq? name (car namelis)) (return #t))
+      (else (exist?-cps name (cdr namelis) return)))))
 
 ; ===== Miscellaneous =====
 
@@ -261,10 +271,6 @@
     (pair? v)))
 
 ; ===== Predefined values =====
-(define returnvar
-  (lambda ()
-    'return))
-
 (define nullvalue
   (lambda ()
     'null))
@@ -279,4 +285,6 @@
 
 (define initstate
   (lambda ()
-    (list (list (returnvar)) (list nullvalue))))
+    '(()())))
+
+(define returnvalue (lambda (v) v))

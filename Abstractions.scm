@@ -68,6 +68,11 @@
   (lambda (stmt)
     (caddr stmt)))
 
+; block-body
+(define block-body
+  (lambda (stmt)
+    (cadr stmt)))
+
 ; ===== STATE =====
 
 ; insert-var

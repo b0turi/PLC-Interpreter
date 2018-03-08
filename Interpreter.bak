@@ -1,5 +1,5 @@
 ; ==========================================
-; Interpreter, Part 2
+; Interpreter, Part 1
 ; EECS 345 - Programming Language Concepts
 ;
 ; Group 8
@@ -44,9 +44,6 @@
       ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s return))
       ((eq? (operator stmt) 'if) (M_state_if (condition stmt) (then stmt) (else stmt) s return))
 
-      ; Check if the statement is a block of code contained in curly brackets, defined by "begin" in the parser
-      ((eq? (operator stmt) 'begin) (M_remove_layer (M_add_layer (block-body stmt) s return) return))
-      
       (else (M_state_side_effect stmt s)))))
 
 ; M_state_side_effect
@@ -131,10 +128,4 @@
     (cond
       ((exist? varname s) (error "Redefining"))
       (else (insert-var varname value s)))))
-
-
-; M_add_layer
-(define M_add_layer
-  (lambda stmt-list s return
-    (return 
 
