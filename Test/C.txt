@@ -1,1 +1,7 @@
-throw true;
+try {
+}
+catch (e) {
+}
+finally {
+}
+return 0;

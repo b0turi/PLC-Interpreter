@@ -9,9 +9,6 @@
 ; Kyle Thompson
 ; ==========================================
 
-#lang racket
-(provide (all-defined-out))
-
 (require "simpleParser.scm")
 (require "Abstractions.scm")
 
@@ -41,9 +38,13 @@
       ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
       ((not (exp? stmt)) s)
 
-      ((value-goto? (operator stmt)) (goto (operator stmt) (realvalue (M_value (return-exp stmt) s))))
+      ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) s))))
+
+      ((eq? (operator stmt) 'throw) (goto 'throw (throws (realvalue (M_value (return-exp stmt) s)) s)))
 
       ((state-goto? (operator stmt)) (goto (operator stmt) s))
+
+      ((eq? (operator stmt) 'try) (remove_layer (M_state_try-start stmt (add_layer s) goto)))
       
       ; Check if the statement branches 
       ((eq? (operator stmt) 'while) (M_state_while-start (condition stmt) (body stmt) s goto))
@@ -148,3 +149,30 @@
     (cond
       ((exist-top? varname s) (error "Redefining"))
       (else (insert-var varname value s)))))
+
+; M_state_try-start
+(define M_state_try-start
+  (lambda (stmt s goto)
+    (cond
+      ((and (catch? stmt) (finally? stmt)) (M_state_list (finally-body stmt) (M_state_catch stmt s goto) goto))
+      ((catch? stmt) (M_state_catch stmt s goto))
+      ((finally? stmt) (M_state (finally-body stmt) (M_state_try (try-body stmt) s goto) goto))
+      (else (M_state_try (try-body stmt) s goto)))))
+
+(define M_state_catch
+  (lambda (stmt s goto)
+    (call/cc
+     (lambda (throw)
+       (M_state_list (try-body stmt) s (goto-setup 'throw (lambda (v) (throw (throw-sep v (lambda (e state) (M_state_list (catch-body stmt) (M_state_declare (catch-var stmt) e state) goto))))) goto))))))
+
+
+(define M_state_try
+  (lambda (stmt s goto)
+    (call/cc
+     (lambda (throw)
+       (M_state_list stmt s (goto-setup 'throw (lambda (v) (throw (throw-state v))) goto))))))
+
+
+
+
+

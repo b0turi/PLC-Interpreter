@@ -36,6 +36,36 @@
   (lambda (math_stmt)
     (caddr math_stmt)))
 
+(define try-body
+  (lambda (stmt)
+    (cadr stmt)))
+
+(define catch?
+  (lambda (stmt)
+    (cond
+      ((null? (caddr stmt)) #f)
+      ((eq? (operator (caddr stmt)) 'catch) #t)
+      (else #f))))
+
+(define catch-var
+  (lambda (stmt)
+    (caadr (caddr stmt))))
+
+(define catch-body
+  (lambda (stmt)
+    (caddr (caddr stmt))))
+
+(define finally?
+  (lambda (stmt)
+    (cond
+      ((null? (cadddr stmt)) #f)
+      ((eq? (operator (cadddr stmt)) 'finally) #t)
+      (else #f))))
+
+(define finally-body
+  (lambda (stmt)
+    (cadr (cadddr stmt))))
+
 ; ==== If and While Statement Helpers ====
 
 ; condition
@@ -316,7 +346,7 @@
     (error "error")))
 
 (define initgoto
-    (goto-setup 'throw (lambda (s) (if (number? s) (error (number->string s)) (error s))) gotoerror))
+    (goto-setup 'throw (lambda (s) (if (number? (car s)) (error (number->string (car s))) (error (car s)))) gotoerror))
 
 (define block_goto
   (lambda (goto)
@@ -328,8 +358,14 @@
       (eq? op 'break)
       (eq? op 'continue))))
 
-(define value-goto?
-  (lambda (op)
-    (or
-      (eq? op 'return)
-      (eq? op 'throw))))
+(define throws
+  (lambda (v s)
+    (list v s)))
+
+(define throw-sep
+  (lambda (lis returns)
+    (returns (car lis) (cadr lis))))
+
+(define throw-state
+  (lambda (lis)
+    (cadr lis)))
