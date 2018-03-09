@@ -99,8 +99,8 @@
 (define M_state_if
   (lambda (condition then-statement else-statement s goto)
     (if (M_boolean condition s)
-      (M_state then-statement (M_state_side_effect condition s) goto)
-      (M_state else-statement (M_state_side_effect condition s) goto))))
+      (M_state then-statement s goto)
+      (M_state else-statement s goto))))
 
 (define M_state_while-start
   (lambda (condition body-statement s goto)
@@ -113,8 +113,8 @@
 (define M_state_while
   (lambda (condition body-statement s goto)
     (if (M_boolean condition s)
-      (M_state_while condition body-statement (M_state-continue body-statement (M_state_side_effect condition s) goto) goto)
-      (M_state_side_effect condition s))))
+      (M_state_while condition body-statement (M_state-continue body-statement s goto) goto)
+      s)))
 
 (define M_state-continue
   (lambda (stmt s goto)
@@ -127,7 +127,7 @@
   (lambda (stmt s goto)
     (cond
       ((and (catch? stmt) (finally? stmt)) (M_state_block (finally-body stmt) (M_state_try_with-catch stmt s goto) goto))
-      ((catch? stmt) (M_state_try_with-catch stmt (add_layer s) goto))
+      ((catch? stmt) (M_state_try_with-catch stmt s goto))
       ((finally? stmt) (M_state_block (finally-body stmt) (M_state_try_without-catch (try-body stmt) s goto) goto))
       (else (M_state_try_without-catch (try-body stmt) s goto)))))
 
@@ -143,7 +143,7 @@
   (lambda (stmt s goto)
     (call/cc
      (lambda (throw)
-       (M_state_block (try-body stmt) s (goto-setup 'throw (lambda (t) (throw (M_state_catch stmt (throw-value t) (throw-state t) goto))) goto))))))
+       (M_state_block (try-body stmt) s (goto-setup 'throw (lambda (t) (throw (M_state_catch stmt (throw-value t) (remove_layer (throw-state t)) goto))) goto))))))
 
 ; M_state_catch
 (define M_state_catch

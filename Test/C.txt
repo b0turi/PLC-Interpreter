@@ -1,7 +1,12 @@
-try {
+var x = 1;
+while (true) {
+	try {
+		var x = 2;
+		throw 10;
+	}
+	catch (e) {
+		x = e;
+		break;
+	}
 }
-catch (e) {
-}
-finally {
-}
-return 0;
+return x;

@@ -117,7 +117,7 @@
 ; accounting for boolean literals, and return the new state with the variable added
 (define insert-var
   (lambda (varname value s)
-    (cons (list (cons varname (caar s)) (cons value (cadar s))) (cdr s))))
+    (cons (list (cons varname (caar s)) (cons (box value) (cadar s))) (cdr s))))
 
 ; replace-value
 ; Given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
@@ -132,7 +132,7 @@
   (lambda (varname value namelis valuelis return break)
     (cond
       ((null? namelis) (break))
-      ((equal? varname (car namelis)) (return namelis (cons value (cdr valuelis))))
+      ((equal? varname (car namelis)) (begin (set-box! (car valuelis) value) (return namelis valuelis)))
       (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))) break)))))
 
 (define add_layer
@@ -162,7 +162,7 @@
     (cond
       ((null? namelis) (break))
       ((and (eq? name (car namelis)) (null_value? (car valuelis))) (error "using before assigning"))
-      ((eq? name (car namelis)) (return (car valuelis)))
+      ((eq? name (car namelis)) (return (unbox (car valuelis))))
       (else (lookup-cps name (cdr namelis) (cdr valuelis) return break)))))
 
 (define boolvalue
