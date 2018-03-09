@@ -56,6 +56,7 @@
       (else (M_state_side_effect stmt s)))))
 
 ; M_state_side_effect
+; Given a statement and a state, look through the statement to see if it will affect any other parts of the state, and if it does, return the new state
 (define M_state_side_effect
   (lambda (stmt s)
     (cond
@@ -74,8 +75,11 @@
       (else s))))
 
 ; M_state_block
+; Given a list of statements contained within curly braces {} in the original code, iterate through the block, executing each line,
+; and storing a goto value to keep track of where the line of execution should go after the block is completed
 (define M_state_block
   (lambda (stmt-lis s goto)
+    ; Each block of code exists within its own layer on top of the state, which must be removed after the block is completed
     (remove_layer (M_state_list stmt-lis (add_layer s) (block_goto goto)))))
 
 ; M_state_assign
@@ -101,7 +105,8 @@
     (if (M_boolean condition s)
       (M_state then-statement (M_state_side_effect condition s) goto)
       (M_state else-statement (M_state_side_effect condition s) goto))))
-
+; M_state_while-start
+; A helper function for M_state_while using the current continuation to keep track of the state
 (define M_state_while-start
   (lambda (condition body-statement s goto)
     (call/cc
@@ -116,6 +121,8 @@
       (M_state_while condition body-statement (M_state-continue body-statement (M_state_side_effect condition s) goto) goto)
       (M_state_side_effect condition s))))
 
+; M_state_continue
+; Given a statement, state, and a point to jump to within a given loop of iteration, return to the top of the loop
 (define M_state-continue
   (lambda (stmt s goto)
     (call/cc
@@ -123,6 +130,8 @@
        (M_state stmt s (goto-setup 'continue continue goto))))))
 
 ; M_state_try
+; Given a block of code that contains a portion of a try/catch block, a state, and a point to go to,
+; go to the correct portion of the code based on the portion of the try/catch block
 (define M_state_try
   (lambda (stmt s goto)
     (cond
@@ -132,6 +141,7 @@
       (else (M_state_try_without-catch (try-body stmt) s goto)))))
 
 ; M_state_try_without-catch
+; Given a statement, state, and branching point, attempt to execute the statement as a block of code and if an error occurs, jump to the goto point
 (define M_state_try_without-catch
   (lambda (stmt s goto)
     (call/cc
@@ -139,6 +149,7 @@
        (M_state_block stmt s (goto-setup 'throw (lambda (t) (throw (throw-state t))) goto))))))
 
 ; M_state_try_with-catch
+; Given a statement, state, and branching point, attempt to execute the statement as a block of code but if an error occurs, jump to the associated catch statement
 (define M_state_try_with-catch
   (lambda (stmt s goto)
     (call/cc
@@ -146,6 +157,7 @@
        (M_state_block (try-body stmt) s (goto-setup 'throw (lambda (t) (throw (M_state_catch stmt (throw-value t) (throw-state t) goto))) goto))))))
 
 ; M_state_catch
+; Execute a block of code that is associated with a try block and handle any errors that occurred during execution of the try block
 (define M_state_catch
   (lambda (stmt e s goto)
     (M_state_block (catch-body stmt) (M_state_declare (catch-var stmt) e s) goto)))
