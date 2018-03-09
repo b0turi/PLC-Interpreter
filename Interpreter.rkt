@@ -51,7 +51,7 @@
       ((eq? (operator stmt) 'if) (M_state_if (condition stmt) (then stmt) (else stmt) s goto))
 
       ; Check if the statement is a block of code, defined by "begin" in the parser
-      ((eq? (operator stmt) 'begin) (remove_layer (M_state_list (block-body stmt) (add_layer s) (block_goto goto))))
+      ((eq? (operator stmt) 'begin) (M_state_block (block-body stmt) s goto))
       
       (else (M_state_side_effect stmt s)))))
 
@@ -72,6 +72,11 @@
       ((single_value? stmt) (M_state_side_effect (operand1 stmt) s))
       ((dual_value? (operator stmt)) (M_state_side_effect (operand2 stmt) (M_state_side_effect (operand1 stmt) s)))
       (else s))))
+
+; M_state_block
+(define M_state_block
+  (lambda (stmt-lis s goto)
+    (remove_layer (M_state_list stmt-lis (add_layer s) (block_goto goto)))))
 
 ; M_state_assign
 ; Given a variable name, value, and a state, update the state so
@@ -121,29 +126,29 @@
 (define M_state_try
   (lambda (stmt s goto)
     (cond
-      ((and (catch? stmt) (finally? stmt)) (M_state_list (finally-body stmt) (remove_layer (M_state_try_with-catch stmt (add_layer s) goto)) goto))
-      ((catch? stmt) (remove_layer (M_state_try_with-catch stmt (add_layer s) goto)))
-      ((finally? stmt) (M_state_list (finally-body stmt) (remove_layer (M_state_try_without-catch (try-body stmt) (add_layer s) goto)) goto))
-      (else (remove_layer (M_state_try_without-catch (try-body stmt) (add_layer s) goto))))))
+      ((and (catch? stmt) (finally? stmt)) (M_state_block (finally-body stmt) (M_state_try_with-catch stmt s goto) goto))
+      ((catch? stmt) (M_state_try_with-catch stmt (add_layer s) goto))
+      ((finally? stmt) (M_state_block (finally-body stmt) (M_state_try_without-catch (try-body stmt) s goto) goto))
+      (else (M_state_try_without-catch (try-body stmt) s goto)))))
 
 ; M_state_try_without-catch
 (define M_state_try_without-catch
   (lambda (stmt s goto)
     (call/cc
      (lambda (throw)
-       (M_state_list stmt s (goto-setup 'throw (lambda (t) (throw (throw-state t))) goto))))))
+       (M_state_block stmt s (goto-setup 'throw (lambda (t) (throw (throw-state t))) goto))))))
 
 ; M_state_try_with-catch
 (define M_state_try_with-catch
   (lambda (stmt s goto)
     (call/cc
      (lambda (throw)
-       (M_state_list (try-body stmt) s (goto-setup 'throw (lambda (t) (throw (M_state_catch stmt (throw-value t) (add_layer (remove_layer (throw-state t))) goto))) goto))))))
+       (M_state_block (try-body stmt) s (goto-setup 'throw (lambda (t) (throw (M_state_catch stmt (throw-value t) (throw-state t) goto))) goto))))))
 
 ; M_state_catch
 (define M_state_catch
   (lambda (stmt e s goto)
-    (M_state_list (catch-body stmt) (M_state_declare (catch-var stmt) e s) goto)))
+    (M_state_block (catch-body stmt) (M_state_declare (catch-var stmt) e s) goto)))
 
 ; M_value
 ; Given a statement and a state, retrieve the value returned by the statement
