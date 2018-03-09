@@ -1,5 +1,12 @@
+
 ; ==========================================
-; Abstractions
+; Abstractions, Part 2
+; EECS 345 - Programming Language Concepts
+;
+; Group 8
+; Jaafar Bennani
+; Alex Hemm
+; Kyle Thompson
 ; ==========================================
 
 #lang racket
@@ -346,7 +353,7 @@
     (error "error")))
 
 (define initgoto
-    (goto-setup 'throw (lambda (s) (if (number? (car s)) (error (number->string (car s))) (error (car s)))) gotoerror))
+    (goto-setup 'throw (lambda (s) (if (number? (throw-value s)) (error (string-append "error: " (number->string (throw-value s)))) (error (throw-value s)))) gotoerror))
 
 (define block_goto
   (lambda (goto)
@@ -362,9 +369,9 @@
   (lambda (v s)
     (list v s)))
 
-(define throw-sep
-  (lambda (lis returns)
-    (returns (car lis) (cadr lis))))
+(define throw-value
+  (lambda (lis)
+    (car lis)))
 
 (define throw-state
   (lambda (lis)

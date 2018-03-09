@@ -44,7 +44,7 @@
 
       ((state-goto? (operator stmt)) (goto (operator stmt) s))
 
-      ((eq? (operator stmt) 'try) (remove_layer (M_state_try-start stmt (add_layer s) goto)))
+      ((eq? (operator stmt) 'try) (M_state_try stmt s goto))
       
       ; Check if the statement branches 
       ((eq? (operator stmt) 'while) (M_state_while-start (condition stmt) (body stmt) s goto))
@@ -72,6 +72,78 @@
       ((single_value? stmt) (M_state_side_effect (operand1 stmt) s))
       ((dual_value? (operator stmt)) (M_state_side_effect (operand2 stmt) (M_state_side_effect (operand1 stmt) s)))
       (else s))))
+
+; M_state_assign
+; Given a variable name, value, and a state, update the state so
+; that the value of the variable of the given name is the given value
+(define M_state_assign
+  (lambda (varname value s)
+    (replace-value varname value s)))
+
+; M_state_declare
+; takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
+(define M_state_declare
+  (lambda (varname value s)
+    (cond
+      ((exist-top? varname s) (error "Redefining"))
+      (else (insert-var varname value s)))))
+
+; M_state_if
+; Given a condition, its relevant then and else statements, and a state, return the 
+; new state with the relevant statement evaluated, based on the condition
+(define M_state_if
+  (lambda (condition then-statement else-statement s goto)
+    (if (M_boolean condition s)
+      (M_state then-statement (M_state_side_effect condition s) goto)
+      (M_state else-statement (M_state_side_effect condition s) goto))))
+
+(define M_state_while-start
+  (lambda (condition body-statement s goto)
+    (call/cc
+     (lambda (break)
+       (M_state_while condition body-statement s (goto-setup 'break break goto))))))
+
+; M_state_while
+; Given a condition, body, and state, recursively update the state until the condition is met
+(define M_state_while
+  (lambda (condition body-statement s goto)
+    (if (M_boolean condition s)
+      (M_state_while condition body-statement (M_state-continue body-statement (M_state_side_effect condition s) goto) goto)
+      (M_state_side_effect condition s))))
+
+(define M_state-continue
+  (lambda (stmt s goto)
+    (call/cc
+     (lambda (continue)
+       (M_state stmt s (goto-setup 'continue continue goto))))))
+
+; M_state_try
+(define M_state_try
+  (lambda (stmt s goto)
+    (cond
+      ((and (catch? stmt) (finally? stmt)) (M_state_list (finally-body stmt) (remove_layer (M_state_try_with-catch stmt (add_layer s) goto)) goto))
+      ((catch? stmt) (remove_layer (M_state_try_with-catch stmt (add_layer s) goto)))
+      ((finally? stmt) (M_state_list (finally-body stmt) (remove_layer (M_state_try_without-catch (try-body stmt) (add_layer s) goto)) goto))
+      (else (remove_layer (M_state_try_without-catch (try-body stmt) (add_layer s) goto))))))
+
+; M_state_try_without-catch
+(define M_state_try_without-catch
+  (lambda (stmt s goto)
+    (call/cc
+     (lambda (throw)
+       (M_state_list stmt s (goto-setup 'throw (lambda (t) (throw (throw-state t))) goto))))))
+
+; M_state_try_with-catch
+(define M_state_try_with-catch
+  (lambda (stmt s goto)
+    (call/cc
+     (lambda (throw)
+       (M_state_list (try-body stmt) s (goto-setup 'throw (lambda (t) (throw (M_state_catch stmt (throw-value t) (add_layer (remove_layer (throw-state t))) goto))) goto))))))
+
+; M_state_catch
+(define M_state_catch
+  (lambda (stmt e s goto)
+    (M_state_list (catch-body stmt) (M_state_declare (catch-var stmt) e s) goto)))
 
 ; M_value
 ; Given a statement and a state, retrieve the value returned by the statement
@@ -105,74 +177,4 @@
       ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state_side_effect (operand1 exp) s))))
       ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state_side_effect (operand1 exp) s))))
       (else (error "Expression id not valid")))))
- 
-; M_state_if
-; Given a condition, its relevant then and else statements, and a state, return the 
-; new state with the relevant statement evaluated, based on the condition
-(define M_state_if
-  (lambda (condition then-statement else-statement s goto)
-    (if (M_boolean condition s)
-      (M_state then-statement (M_state_side_effect condition s) goto)
-      (M_state else-statement (M_state_side_effect condition s) goto))))
-
-(define M_state_while-start
-  (lambda (condition body-statement s goto)
-    (call/cc
-     (lambda (break)
-       (M_state_while condition body-statement s (goto-setup 'break break goto))))))
-
-; M_state_while
-; Given a condition, body, and state, recursively update the state until the condition is met
-(define M_state_while
-  (lambda (condition body-statement s goto)
-    (if (M_boolean condition s)
-      (M_state_while condition body-statement (M_state-continue body-statement (M_state_side_effect condition s) goto) goto)
-      (M_state_side_effect condition s))))
-
-(define M_state-continue
-  (lambda (stmt s goto)
-    (call/cc
-     (lambda (continue)
-       (M_state stmt s (goto-setup 'continue continue goto))))))
-
-; M_state_assign
-; Given a variable name, value, and a state, update the state so
-; that the value of the variable of the given name is the given value
-(define M_state_assign
-  (lambda (varname value s)
-    (replace-value varname value s)))
-
-; M_state_declare
-; takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
-(define M_state_declare
-  (lambda (varname value s)
-    (cond
-      ((exist-top? varname s) (error "Redefining"))
-      (else (insert-var varname value s)))))
-
-; M_state_try-start
-(define M_state_try-start
-  (lambda (stmt s goto)
-    (cond
-      ((and (catch? stmt) (finally? stmt)) (M_state_list (finally-body stmt) (M_state_catch stmt s goto) goto))
-      ((catch? stmt) (M_state_catch stmt s goto))
-      ((finally? stmt) (M_state (finally-body stmt) (M_state_try (try-body stmt) s goto) goto))
-      (else (M_state_try (try-body stmt) s goto)))))
-
-(define M_state_catch
-  (lambda (stmt s goto)
-    (call/cc
-     (lambda (throw)
-       (M_state_list (try-body stmt) s (goto-setup 'throw (lambda (v) (throw (throw-sep v (lambda (e state) (M_state_list (catch-body stmt) (M_state_declare (catch-var stmt) e state) goto))))) goto))))))
-
-
-(define M_state_try
-  (lambda (stmt s goto)
-    (call/cc
-     (lambda (throw)
-       (M_state_list stmt s (goto-setup 'throw (lambda (v) (throw (throw-state v))) goto))))))
-
-
-
-
 
