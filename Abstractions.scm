@@ -43,10 +43,14 @@
   (lambda (math_stmt)
     (caddr math_stmt)))
 
+; try-body
+; Given a statement known to be a try/catch block, retrieve the body of the try block
 (define try-body
   (lambda (stmt)
     (cadr stmt)))
 
+; catch?
+; Returns whether a given statement is a catch block
 (define catch?
   (lambda (stmt)
     (cond
@@ -54,21 +58,28 @@
       ((eq? (operator (caddr stmt)) 'catch) #t)
       (else #f))))
 
+; catch-var
+; As a part of error handling, grab the value to be returned within a catch block from a complete try/catch statement
 (define catch-var
   (lambda (stmt)
     (caadr (caddr stmt))))
 
+; catch-body
+; Given a statement known to be a try/catch block, retrieve the body of the catch block
 (define catch-body
   (lambda (stmt)
     (caddr (caddr stmt))))
 
+; finally?
+; Returns whether a given statement is a finally block
 (define finally?
   (lambda (stmt)
     (cond
       ((null? (cadddr stmt)) #f)
       ((eq? (operator (cadddr stmt)) 'finally) #t)
       (else #f))))
-
+; finally-body
+; Given a statement that is known to be a try/catch/finally block, retrieve the body of the associated finally block
 (define finally-body
   (lambda (stmt)
     (cadr (cadddr stmt))))
@@ -135,10 +146,14 @@
       ((equal? varname (car namelis)) (begin (set-box! (car valuelis) value) (return namelis valuelis)))
       (else (replaceval-cps varname value (cdr namelis) (cdr valuelis) (lambda (l1 l2) (return (cons (car namelis) l1) (cons (car valuelis) l2))) break)))))
 
+; add_layer
+; Add a new layer of variables to the top of the list of layers within the state to handle scope of specific variables
 (define add_layer
   (lambda (s)
     (cons '(() ()) s)))
 
+; remove_layer
+; Remove the top layer of the list of layers within the state, and return the new state
 (define remove_layer
   (lambda (s)
     (if (null? s)
@@ -165,6 +180,8 @@
       ((eq? name (car namelis)) (return (unbox (car valuelis))))
       (else (lookup-cps name (cdr namelis) (cdr valuelis) return break)))))
 
+; boolvalue
+; Return the literal boolean value of a given value that is assumed to be either the truevalue or falsevalue atom
 (define boolvalue
   (lambda (v)
     (cond
@@ -172,13 +189,15 @@
       ((eq? v (falsevalue)) #f)
       (else (error "invalid boolean")))))
 
+; boolvalue?
+; Return whether a given value is either the truevalue or falsevalue atom
 (define boolvalue?
   (lambda (v)
     (or (eq? v (truevalue)) (eq? v (falsevalue)))))
 
 ; ===== Exist? =====
 ; exist?
-; takes in a variable name and a list, returns 
+; Given a name and a state, check if the given name is defined anywhere in any of the layers of the state
 (define exist?
   (lambda (name s)
     (if (null? s)
@@ -194,10 +213,14 @@
       ((eq? name (car namelis)) (return #t))
       (else (exist?-cps name (cdr namelis) return break)))))
 
+; exist-top?
+; Given a name and a state, check if the given name is defined within the top layer of the state
 (define exist-top?
-  (lambda (varname s)
-    (exist-top?-cps varname (caar s) (lambda (v) v))))
+  (lambda (name s)
+    (exist-top?-cps name (caar s) (lambda (v) v))))
 
+; exist-top?-cps
+; A tail recursive helper for exist-top?
 (define exist-top?-cps
   (lambda (name namelis return)
     (cond
@@ -239,6 +262,63 @@
       ((eq? v #t) (truevalue))
       ((eq? v #f) (falsevalue))
       (else v))))
+
+; ===== BRANCHING =====
+
+; goto-setup
+; Given a name, a function to execute, and a branching function, return a function that can be used to check
+; other functions against a stored function and either execute that function or a branching function if the given
+; value is not the same
+(define goto-setup
+  (lambda (name function goto)
+    (lambda (f v)
+      (if (eq? f name)
+          (function v)
+          (goto f v)))))
+
+; gotoerror
+; A default error function for branching
+(define gotoerror
+  (lambda (a b)
+    (error "error")))
+
+; initgoto
+; Uses goto-setup to define a function that handles errors when a "throw" statement is encountered
+(define initgoto
+    (goto-setup 'throw (lambda (s) (if (number? (throw-value s)) (error (string-append "error: " (number->string (throw-value s)))) (error (throw-value s)))) gotoerror))
+
+; block_goto
+; Uses goto-setup to define a function that jumps to a given goto spot depending on whether either break or continue are called in the block
+(define block_goto
+  (lambda (goto)
+    (goto-setup 'break (lambda (s) (goto 'break (remove_layer s))) (goto-setup 'continue (lambda (s) (goto 'continue (remove_layer s))) goto))))
+
+; state-goto?
+; Given an operation, determine if the state will need to change based on whether the operation is 'break or 'continue
+(define state-goto?
+  (lambda (op)
+    (or
+      (eq? op 'break)
+      (eq? op 'continue))))
+
+; throws
+; Given a value and a state, combine the two in a list for the completion of the goto function defined with goto-setup
+(define throws
+  (lambda (v s)
+    (list v s)))
+
+; throw-value
+; Given a statement that is known to be a throws statement, retrieve the value that is to be thrown
+(define throw-value
+  (lambda (stmt)
+    (car stmt)))
+
+; throw-state
+; Given a statement that is known to be a throws statement, retrieve the current state when the throws operation is called
+(define throw-state
+  (lambda (lis)
+    (cadr lis)))
+
 
 ; ===== OPERATIONS =====
 
@@ -340,39 +420,3 @@
     (add_layer null)))
 
 (define returnvalue (lambda (v) v))
-
-(define goto-setup
-  (lambda (name function goto)
-    (lambda (f v)
-      (if (eq? f name)
-          (function v)
-          (goto f v)))))
-
-(define gotoerror
-  (lambda (a b)
-    (error "error")))
-
-(define initgoto
-    (goto-setup 'throw (lambda (s) (if (number? (throw-value s)) (error (string-append "error: " (number->string (throw-value s)))) (error (throw-value s)))) gotoerror))
-
-(define block_goto
-  (lambda (goto)
-    (goto-setup 'break (lambda (s) (goto 'break (remove_layer s))) (goto-setup 'continue (lambda (s) (goto 'continue (remove_layer s))) goto))))
-
-(define state-goto?
-  (lambda (op)
-    (or
-      (eq? op 'break)
-      (eq? op 'continue))))
-
-(define throws
-  (lambda (v s)
-    (list v s)))
-
-(define throw-value
-  (lambda (lis)
-    (car lis)))
-
-(define throw-state
-  (lambda (lis)
-    (cadr lis)))
