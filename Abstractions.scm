@@ -160,6 +160,13 @@
         (error "No layers present")
         (cdr s))))
 
+(define remove-layer
+  (lambda (fname s)
+    (cond
+      ((null? s) (error "No layers present"))
+      ((exist-top? fname s) s)
+      (else (cdr s)))))
+
 ; ===== Lookup =====
 ; lookup
 ; Given a variable name and a state, check if that variable is defined in that state.
@@ -278,14 +285,18 @@
 
 ; gotoerror
 ; A default error function for branching
-(define gotoerror
+(define gotoerror2
+  (lambda (a b)
+    (error "error")))
+
+(define gotoerror1
   (lambda (a b)
     (error "error")))
 
 ; initgoto
 ; Uses goto-setup to define a function that handles errors when a "throw" statement is encountered
 (define initgoto
-    (goto-setup 'throw (lambda (s) (if (number? (throw-value s)) (error (string-append "error: " (number->string (throw-value s)))) (error (throw-value s)))) gotoerror))
+    (goto-setup 'throw (lambda (s) (if (number? (throw-value s)) (error (string-append "error: " (number->string (throw-value s)))) (error (throw-value s)))) gotoerror2))
 
 ; block_goto
 ; Uses goto-setup to define a function that jumps to a given goto spot depending on whether either break or continue are called in the block
@@ -303,7 +314,11 @@
 
 (define func-goto
   (lambda (goto)
-    (goto-setup 'break (error "error") (goto-setup 'continue (error "error") goto))))
+    (goto-setup 'break gotoerror1 (goto-setup 'continue gotoerror1 goto))))
+
+(define gotoreturn
+  (lambda (return s)
+    (lambda (v) (return s))))
 
 ; throws
 ; Given a value and a state, combine the two in a list for the completion of the goto function defined with goto-setup
@@ -447,13 +462,17 @@
   (lambda (stmt)
     (cadr stmt)))
 
-(define function-body
-  (lambda (stmt)
-    (cdddr stmt)))
-
 (define function-parameters
   (lambda (stmt)
     (caddr stmt)))
+
+(define function-body
+  (lambda (stmt)
+    (cadddr stmt)))
+
+(define function-arguments
+  (lambda (stmt)
+    (cddr stmt)))
 
 (define closure-body
   (lambda (stmt)

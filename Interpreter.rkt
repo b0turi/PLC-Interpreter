@@ -9,6 +9,7 @@
 ; Kyle Thompson
 ; ==========================================
 
+;(require "simpleParser.scm")
 (require "functionParser.scm")
 (require "Abstractions.scm")
 
@@ -16,18 +17,27 @@
 ; Given a filename of Java/C-like code, use simpleParser to parse the file and then get the value that block of code returns
 (define interpret
   (lambda (filename)
+    ; The initial state is empty
+    (M_state_main (M_state_list (parser filename) (initstate) initgoto) initgoto)))
+
+; (define interpret (lambda (filename) (call/cc (lambda (return) (M_state_list (parser filename) (initstate) (goto-setup 'return return initgoto)))))) 
+
+(define M_value_function
+  (lambda (fname args s goto)
     (call/cc
      (lambda (return)
-       ; The initial state is empty
-       (M_state_list (parser filename) (initstate) (goto-setup 'return return initgoto))))))
+       (cond
+         ((not (exist? fname s)) (error "Function does not exist"))
+         (else (M_state_list (closure-body (lookup fname s)) (fsetup (closure-params (lookup fname s)) args (add_layer (remove-layer fname s))) (goto-setup 'return return (func-goto goto)))))))))
 
- (define M_value_function
-  (lambda (fname fclosure args s goto)
+(define M_state_function
+  (lambda (fname args s goto)
     (call/cc
-        (lambda (return)
-          (cond
-            ((not (exist? fname)) (error "Function does not exist"))
-            (else (M_state_list (closure-body fclosure) (fsetup (closure-params fclosure) args (add_layer (remove_layer s))) (goto-setup 'return return (func-goto goto)))))))))
+     (lambda (return)
+    (cond
+      ((not (exist? fname s)) (error "Function does not exist"))
+      (else (M_state_list (closure-body (lookup fname s)) (fsetup (closure-params (lookup fname s)) args (add_layer (remove-layer fname s))) (goto-setup 'return (gotoreturn return s) (func-goto goto)))))))))
+
 
 (define M_state_main
   (lambda (s goto)
@@ -52,12 +62,12 @@
       ((not (exp? stmt)) s)
       
       ; Check if the statement creates a new variable
-      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state (assignment stmt) s goto) goto))
+      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto) goto))
       
       ; Check if the statement is a function declaration
-      ((eq? (operator stmt) 'function) (M_state_declare (var-name stmt) (closure (function-params stmt) (function-body stmt)) s goto))
+      ((eq? (operator stmt) 'function) (M_state_declare (var-name stmt) (closure (function-parameters stmt) (function-body stmt)) s goto))
       
-      ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) s goto))))
+      ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) (M_state_side-effect (assignment stmt) s goto) goto))))
 
       ((eq? (operator stmt) 'throw) (goto 'throw (throws (realvalue (M_value (return-exp stmt) s goto)) s)))
 
@@ -71,14 +81,27 @@
 
       ; Check if the statement is a block of code, defined by "begin" in the parser
       ((eq? (operator stmt) 'begin) (M_state_block (block-body stmt) s goto))
-
       
+      ; Check if a function is being called
+      ((eq? (operator stmt) 'funcall) (M_state_function (function-name stmt) (M_value_list (function-arguments stmt) s goto) s goto))
+      
+      (else (M_state_side-effect stmt s goto)))))
+
+(define M_state_side-effect
+  (lambda (stmt s goto)
+    (cond
+      ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
+      ((not (exp? stmt)) s)
+      
+      ; Check if the statement creates a new variable
+      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto) goto))
+
       ; Check if the statement reassigns a value 
-      ((eq? (operator stmt) '=) (M_state_assign (var-name stmt) (M_value (assignment stmt) s goto) (M_state (assignment stmt) s goto) goto))
+      ((eq? (operator stmt) '=) (M_state_assign (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto) goto))
   
       ; Check if the statement is another kind of expression
-      ((single_value? stmt) (M_state (operand1 stmt) s goto))
-      ((dual_value? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s goto) goto))
+      ((single_value? stmt) (M_state_side-effect (operand1 stmt) s goto))
+      ((dual_value? (operator stmt)) (M_state_side-effect (operand2 stmt) (M_state_side-effect (operand1 stmt) s goto) goto))
       (else s))))
 
 ; M_state_block
@@ -110,8 +133,8 @@
 (define M_state_if
   (lambda (condition then-statement else-statement s goto)
     (if (M_boolean condition s goto)
-      (M_state then-statement s goto)
-      (M_state else-statement s goto))))
+        (M_state then-statement s goto)
+        (M_state else-statement s goto))))
 
 ; M_state_while-start
 ; A helper function for M_state_while using the current continuation to keep track of the state
@@ -126,8 +149,8 @@
 (define M_state_while
   (lambda (condition body-statement s goto)
     (if (M_boolean condition s goto)
-      (M_state_while condition body-statement (M_state-continue body-statement s goto) goto)
-      s)))
+        (M_state_while condition body-statement (M_state-continue body-statement s goto) goto)
+        s)))
 
 ; M_state_continue
 ; Given a statement, state, and a point to jump to within a given loop of iteration, return to the top of the loop
@@ -179,10 +202,6 @@
       ((null_value? stmt) (nullvalue))
       ((or (boolean? stmt) (number? stmt)) stmt)
       ((boolvalue? stmt) (boolvalue stmt))
-      
-      ; Check if a function is being called
-      ((eq? (operator stmt) 'funcall) (M_value_function (function-name stmt) (M_value_list (function-arguments stmt) s goto) s goto))
-      
       (else (lookup stmt s)))))
 
 ; M_boolean
@@ -204,19 +223,22 @@
   (lambda (value-list s goto return)
     (cond
       ((null? value-list) (return value-list))
-      (else (value_list-cps (cdr value-list) s goto (lambda (v) (return (cons (M_value (car value-list) s goto) v))))))))
+      (else (value_list-cps (cdr value-list) s goto (lambda (v) (return (cons (M_value (car value-list) (M_state_side-effect (car value-list) s goto) goto) v))))))))
     
     
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state
 (define M_evaluate
   (lambda (exp s goto)
-    (cond 
+    (cond
+      ; Check if a function is being called
+      ((eq? (operator exp) 'funcall) (M_value_function (function-name exp) (M_value_list (function-arguments exp) s goto) s goto))
+      
       ((unary-? exp) (- 0 (M_value (operand1 exp) s goto)))
       ((eq? (operator exp) '!) (not (M_boolean (operand1 exp) s goto)))
-      ((eq? (operator exp) '=) (M_value (assignment exp) (M_state (assignment exp) s goto) goto))
-      ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s goto) (M_value (operand2 exp) (M_state (operand1 exp) s goto) goto)))
-      ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s goto) (M_boolean (operand2 exp) (M_state (operand1 exp) s goto) goto)))
+      ((eq? (operator exp) '=) (M_value (assignment exp) (M_state_side-effect (assignment exp) s goto) goto))
+      ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s goto) (M_value (operand2 exp) (M_state_side-effect (operand1 exp) s goto) goto)))
+      ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s goto) (M_boolean (operand2 exp) (M_state_side-effect (operand1 exp) s goto) goto)))
       
       (else (error "Expression id not valid")))))
 
