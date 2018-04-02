@@ -16,6 +16,7 @@
 ;
 ; The return value is a parse tree in list format
 
+; (load "lex.scm")
 (require "lex.scm")
 
 (define parser

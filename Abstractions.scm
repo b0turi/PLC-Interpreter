@@ -301,6 +301,10 @@
       (eq? op 'break)
       (eq? op 'continue))))
 
+(define func-goto
+  (lambda (goto)
+    (goto-setup 'break (error "error") (goto-setup 'continue (error "error") goto))))
+
 ; throws
 ; Given a value and a state, combine the two in a list for the completion of the goto function defined with goto-setup
 (define throws
@@ -420,3 +424,40 @@
     (add_layer null)))
 
 (define returnvalue (lambda (v) v))
+
+
+(define closure
+  (lambda (params body)
+    (list params body)))
+
+(define fsetup
+  (lambda (params args s)
+    (cond
+      ((> (length params) (length args)) (error "Too few arguments"))
+      ((< (length params) (length args)) (error "Too many arguments"))
+      (else (fsetup-cps params args s (lambda (v) v))))))
+
+(define fsetup-cps
+  (lambda (params args s return)
+    (cond
+      ((null? params) (return s))
+      (else (fsetup-cps (cdr params) (cdr args) (insert-var (car params) (car args) s) return)))))
+
+(define function-name
+  (lambda (stmt)
+    (cadr stmt)))
+
+(define function-body
+  (lambda (stmt)
+    (cdddr stmt)))
+
+(define function-parameters
+  (lambda (stmt)
+    (caddr stmt)))
+
+(define closure-body
+  (lambda (stmt)
+    (cadr stmt)))
+(define closure-params
+  (lambda (stmt)
+    (car stmt)))

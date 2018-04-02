@@ -21,6 +21,19 @@
        ; The initial state is empty
        (M_state_list (parser filename) (initstate) (goto-setup 'return return initgoto))))))
 
+ (define M_value_function
+  (lambda (fname fclosure args s goto)
+    (call/cc
+        (lambda (return)
+          (cond
+            ((not (exist? fname)) (error "Function does not exist"))
+            (else (M_state_list (closure-body fclosure) (fsetup (closure-params fclosure) args (add_layer (remove_layer s))) (goto-setup 'return return (func-goto goto)))))))))
+
+(define M_state_main
+  (lambda (s goto)
+    (M_value_function 'main '() s goto)))
+    
+
 ; M_state_list
 ; Given a list of statements and a state, evaluate each line with M_state and return the state
 ; after each line has been evaluated
@@ -37,10 +50,16 @@
     (cond
       ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
       ((not (exp? stmt)) s)
+      
+      ; Check if the statement creates a new variable
+      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state (assignment stmt) s goto) goto))
+      
+      ; Check if the statement is a function declaration
+      ((eq? (operator stmt) 'function) (M_state_declare (var-name stmt) (closure (function-params stmt) (function-body stmt)) s goto))
+      
+      ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) s goto))))
 
-      ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) s))))
-
-      ((eq? (operator stmt) 'throw) (goto 'throw (throws (realvalue (M_value (return-exp stmt) s)) s)))
+      ((eq? (operator stmt) 'throw) (goto 'throw (throws (realvalue (M_value (return-exp stmt) s goto)) s)))
 
       ((state-goto? (operator stmt)) (goto (operator stmt) s))
 
@@ -52,26 +71,14 @@
 
       ; Check if the statement is a block of code, defined by "begin" in the parser
       ((eq? (operator stmt) 'begin) (M_state_block (block-body stmt) s goto))
-      
-      (else (M_state_side_effect stmt s)))))
 
-; M_state_side_effect
-; Given a statement and a state, look through the statement to see if it will affect any other parts of the state, and if it does, return the new state
-(define M_state_side_effect
-  (lambda (stmt s)
-    (cond
-      ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
-      ((not (exp? stmt)) s)
       
       ; Check if the statement reassigns a value 
-      ((eq? (operator stmt) '=) (M_state_assign (var-name stmt) (M_value (assignment stmt) s) (M_state_side_effect (assignment stmt) s)))
-      
-      ; Check if the statement creates a new variable
-      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s) (M_state_side_effect (assignment stmt) s)))
-
+      ((eq? (operator stmt) '=) (M_state_assign (var-name stmt) (M_value (assignment stmt) s goto) (M_state (assignment stmt) s goto) goto))
+  
       ; Check if the statement is another kind of expression
-      ((single_value? stmt) (M_state_side_effect (operand1 stmt) s))
-      ((dual_value? (operator stmt)) (M_state_side_effect (operand2 stmt) (M_state_side_effect (operand1 stmt) s)))
+      ((single_value? stmt) (M_state (operand1 stmt) s goto))
+      ((dual_value? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s goto) goto))
       (else s))))
 
 ; M_state_block
@@ -86,13 +93,13 @@
 ; Given a variable name, value, and a state, update the state so
 ; that the value of the variable of the given name is the given value
 (define M_state_assign
-  (lambda (varname value s)
+  (lambda (varname value s goto)
     (replace-value varname value s)))
 
 ; M_state_declare
 ; takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
 (define M_state_declare
-  (lambda (varname value s)
+  (lambda (varname value s goto)
     (cond
       ((exist-top? varname s) (error "Redefining"))
       (else (insert-var varname value s)))))
@@ -102,7 +109,7 @@
 ; new state with the relevant statement evaluated, based on the condition
 (define M_state_if
   (lambda (condition then-statement else-statement s goto)
-    (if (M_boolean condition s)
+    (if (M_boolean condition s goto)
       (M_state then-statement s goto)
       (M_state else-statement s goto))))
 
@@ -118,7 +125,7 @@
 ; Given a condition, body, and state, recursively update the state until the condition is met
 (define M_state_while
   (lambda (condition body-statement s goto)
-    (if (M_boolean condition s)
+    (if (M_boolean condition s goto)
       (M_state_while condition body-statement (M_state-continue body-statement s goto) goto)
       s)))
 
@@ -161,38 +168,55 @@
 ; Execute a block of code that is associated with a try block and handle any errors that occurred during execution of the try block
 (define M_state_catch
   (lambda (stmt e s goto)
-    (M_state_block (catch-body stmt) (M_state_declare (catch-var stmt) e s) goto)))
+    (M_state_block (catch-body stmt) (M_state_declare (catch-var stmt) e s goto) goto)))
 
 ; M_value
 ; Given a statement and a state, retrieve the value returned by the statement
 (define M_value
-  (lambda (stmt s)
+  (lambda (stmt s goto)
     (cond
-      ((exp? stmt) (M_evaluate stmt s))
+      ((exp? stmt) (M_evaluate stmt s goto))
       ((null_value? stmt) (nullvalue))
       ((or (boolean? stmt) (number? stmt)) stmt)
       ((boolvalue? stmt) (boolvalue stmt))
+      
+      ; Check if a function is being called
+      ((eq? (operator stmt) 'funcall) (M_value_function (function-name stmt) (M_value_list (function-arguments stmt) s goto) s goto))
+      
       (else (lookup stmt s)))))
 
 ; M_boolean
 ; Given a boolean statement and a state, return the boolean value of the statement
 (define M_boolean
-  (lambda (b-stmt s)
+  (lambda (b-stmt s goto)
     (cond
-      ((exp? b-stmt) (M_evaluate b-stmt s))
+      ((exp? b-stmt) (M_evaluate b-stmt s goto))
       ((boolean? b-stmt) b-stmt)
       ((boolvalue? b-stmt) (boolvalue b-stmt))
       (else (lookup b-stmt s)))))
 
+(define M_value_list
+  (lambda (value-list s goto)
+    (value_list-cps value-list s goto (lambda (v) v))))
+
+
+(define value_list-cps
+  (lambda (value-list s goto return)
+    (cond
+      ((null? value-list) (return value-list))
+      (else (value_list-cps (cdr value-list) s goto (lambda (v) (return (cons (M_value (car value-list) s goto) v))))))))
+    
+    
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state
 (define M_evaluate
-  (lambda (exp s)
-    (cond
-      ((unary-? exp) (- 0 (M_value (operand1 exp) s)))
-      ((eq? (operator exp) '!) (not (M_boolean (operand1 exp) s)))
-      ((eq? (operator exp) '=) (M_value (assignment exp) (M_state_side_effect (assignment exp) s)))
-      ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state_side_effect (operand1 exp) s))))
-      ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state_side_effect (operand1 exp) s))))
+  (lambda (exp s goto)
+    (cond 
+      ((unary-? exp) (- 0 (M_value (operand1 exp) s goto)))
+      ((eq? (operator exp) '!) (not (M_boolean (operand1 exp) s goto)))
+      ((eq? (operator exp) '=) (M_value (assignment exp) (M_state (assignment exp) s goto) goto))
+      ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s goto) (M_value (operand2 exp) (M_state (operand1 exp) s goto) goto)))
+      ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s goto) (M_boolean (operand2 exp) (M_state (operand1 exp) s goto) goto)))
+      
       (else (error "Expression id not valid")))))
 
