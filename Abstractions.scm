@@ -1,6 +1,6 @@
 
 ; ==========================================
-; Abstractions, Part 2
+; Abstractions, Part 3
 ; EECS 345 - Programming Language Concepts
 ;
 ; Group 8
@@ -13,6 +13,30 @@
 (provide (all-defined-out))
 
 ; ===== Function "readers" =====
+
+; function-arguments
+; Given a statement that is assumed to be a function call, retrieve the list of arguments to call the function with
+(define function-arguments
+  (lambda (stmt)
+    (cddr stmt)))
+
+; function-body
+; Given a statement that is assumed to be a function declaration, retrieve the body of the function
+(define function-body
+  (lambda (stmt)
+    (cadddr stmt)))
+
+; function-name
+; Given a statement that is assumed to be a function declaration, retrieve the name of the function
+(define function-name
+  (lambda (stmt)
+    (cadr stmt)))
+
+; function-parameters
+; Given a statement that is assumed to be a function declaration, retrieve the list of parameters for the function
+(define function-parameters
+  (lambda (stmt)
+    (caddr stmt)))
 
 ; return-exp
 ; Given a statement that is known to be a return statement,
@@ -84,6 +108,25 @@
   (lambda (stmt)
     (cadr (cadddr stmt))))
 
+; closure
+; Given a list of parameters and the body of a function, return the two listed together
+; To be used as the basis for a closure function
+(define closure
+  (lambda (params body)
+    (list params body)))
+
+; closure-body
+; Given a statement that is assumed to be a closure (as created by the helper function "closure"), retrieve the body of the function
+(define closure-body
+  (lambda (stmt)
+    (cadr stmt)))
+
+; closure-params
+; Given a statement that is assumed to be a closure (as created by the helper function "closure"), retrieve the parameters of the function
+(define closure-params
+  (lambda (stmt)
+    (car stmt)))
+
 ; ==== If and While Statement Helpers ====
 
 ; condition
@@ -117,6 +160,7 @@
     (caddr stmt)))
 
 ; block-body
+; Given a statment that is known to be a block of code, retrieve the body of the block
 (define block-body
   (lambda (stmt)
     (cdr stmt)))
@@ -160,12 +204,33 @@
         (error "No layers present")
         (cdr s))))
 
+; remove_layer
+; An alternate version of remove_layer that removes a specific state for a function
 (define remove-layer
   (lambda (fname s)
     (cond
       ((null? s) (error "No layers present"))
       ((exist-top? fname s) s)
       (else (cdr s)))))
+
+; fsetup
+; Given a list of parameters, arguments, and a state, add each of the parameters into the state
+; populated with the argument values, and return the new state
+(define fsetup
+  (lambda (params args s)
+    (cond
+      ((> (length params) (length args)) (error "Too few arguments"))
+      ((< (length params) (length args)) (error "Too many arguments"))
+      (else (fsetup-cps params args s (lambda (v) v))))))
+
+; fsetup-cps
+; A continuation passing style helper for fsetup
+(define fsetup-cps
+  (lambda (params args s return)
+    (cond
+      ((null? params) (return s))
+      (else (fsetup-cps (cdr params) (cdr args) (insert-var (car params) (car args) s) return)))))
+
 
 ; ===== Lookup =====
 ; lookup
@@ -439,44 +504,3 @@
     (add_layer null)))
 
 (define returnvalue (lambda (v) v))
-
-
-(define closure
-  (lambda (params body)
-    (list params body)))
-
-(define fsetup
-  (lambda (params args s)
-    (cond
-      ((> (length params) (length args)) (error "Too few arguments"))
-      ((< (length params) (length args)) (error "Too many arguments"))
-      (else (fsetup-cps params args s (lambda (v) v))))))
-
-(define fsetup-cps
-  (lambda (params args s return)
-    (cond
-      ((null? params) (return s))
-      (else (fsetup-cps (cdr params) (cdr args) (insert-var (car params) (car args) s) return)))))
-
-(define function-name
-  (lambda (stmt)
-    (cadr stmt)))
-
-(define function-parameters
-  (lambda (stmt)
-    (caddr stmt)))
-
-(define function-body
-  (lambda (stmt)
-    (cadddr stmt)))
-
-(define function-arguments
-  (lambda (stmt)
-    (cddr stmt)))
-
-(define closure-body
-  (lambda (stmt)
-    (cadr stmt)))
-(define closure-params
-  (lambda (stmt)
-    (car stmt)))
