@@ -9,7 +9,7 @@
 ; Kyle Thompson
 ; ==========================================
 
-(require "simpleParser.scm")
+(require "functionParser.scm")
 (require "Abstractions.scm")
 
 ; interpret
@@ -21,11 +21,13 @@
        ; The initial state is empty
        (M_state_list (parser filename) (initstate) (goto-setup 'return return initgoto))))))
 
-; (define M_value_function
-;  (lambda (fname params s goto)
-;    (cond
-;      ((not (exist? fname)) (error "Function does not exist"))
-;      ())))
+ (define M_value_function
+  (lambda (fname fclosure args s goto)
+    (call/cc
+        (lambda (return)
+          (cond
+            ((not (exist? fname)) (error "Function does not exist"))
+            (else (M_state_list (closure-body fclosure) (fsetup (closure-params fclosure) args (add_layer (remove_layer s))) (goto-setup 'return return (func-goto goto)))))))))
 
 (define M_state_main
   (lambda (s goto)
@@ -48,7 +50,13 @@
     (cond
       ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
       ((not (exp? stmt)) s)
-
+      
+      ; Check if the statement creates a new variable
+      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state (assignment stmt) s goto) goto))
+      
+      ; Check if the statement is a function declaration
+      ((eq? (operator stmt) 'function) (M_state_declare (var-name stmt) (closure (function-params stmt) (function-body stmt)) s goto))
+      
       ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) s goto))))
 
       ((eq? (operator stmt) 'throw) (goto 'throw (throws (realvalue (M_value (return-exp stmt) s goto)) s)))
@@ -64,14 +72,10 @@
       ; Check if the statement is a block of code, defined by "begin" in the parser
       ((eq? (operator stmt) 'begin) (M_state_block (block-body stmt) s goto))
 
-      ; Check if the statement is a function declaration
       
       ; Check if the statement reassigns a value 
       ((eq? (operator stmt) '=) (M_state_assign (var-name stmt) (M_value (assignment stmt) s goto) (M_state (assignment stmt) s goto) goto))
   
-      ; Check if the statement creates a new variable
-      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state (assignment stmt) s goto) goto))
-
       ; Check if the statement is another kind of expression
       ((single_value? stmt) (M_state (operand1 stmt) s goto))
       ((dual_value? (operator stmt)) (M_state (operand2 stmt) (M_state (operand1 stmt) s goto) goto))
@@ -175,6 +179,10 @@
       ((null_value? stmt) (nullvalue))
       ((or (boolean? stmt) (number? stmt)) stmt)
       ((boolvalue? stmt) (boolvalue stmt))
+      
+      ; Check if a function is being called
+      ((eq? (operator stmt) 'funcall) (M_value_function (function-name stmt) (M_value_list (function-arguments stmt) s goto) s goto))
+      
       (else (lookup stmt s)))))
 
 ; M_boolean
@@ -187,15 +195,28 @@
       ((boolvalue? b-stmt) (boolvalue b-stmt))
       (else (lookup b-stmt s)))))
 
+(define M_value_list
+  (lambda (value-list s goto)
+    (value_list-cps value-list s goto (lambda (v) v))))
+
+
+(define value_list-cps
+  (lambda (value-list s goto return)
+    (cond
+      ((null? value-list) (return value-list))
+      (else (value_list-cps (cdr value-list) s goto (lambda (v) (return (cons (M_value (car value-list) s goto) v))))))))
+    
+    
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state
 (define M_evaluate
   (lambda (exp s goto)
-    (cond
+    (cond 
       ((unary-? exp) (- 0 (M_value (operand1 exp) s goto)))
       ((eq? (operator exp) '!) (not (M_boolean (operand1 exp) s goto)))
       ((eq? (operator exp) '=) (M_value (assignment exp) (M_state (assignment exp) s goto) goto))
       ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s goto) (M_value (operand2 exp) (M_state (operand1 exp) s goto) goto)))
       ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s goto) (M_boolean (operand2 exp) (M_state (operand1 exp) s goto) goto)))
+      
       (else (error "Expression id not valid")))))
 
