@@ -9,7 +9,7 @@
 ; Kyle Thompson
 ; ==========================================
 
-(require "simpleParser.scm")
+(require "functionParser.scm")
 (require "Abstractions.scm")
 
 ; interpret

@@ -1,1287 +1,4 @@
-<<<<<<< HEAD
-#reader(lib"read.ss""wxme")WXME0108 ## 
-#|
-   This file uses the GRacket editor format.
-   Open this file in DrRacket version 6.11 or later to read it.
 
-   Most likely, it was created by saving a program in DrRacket,
-   and it probably contains a program with non-text elements
-   (such as images or comment boxes).
-
-            http://racket-lang.org/
-|#
- 33 7 #"wxtext\0"
-3 1 6 #"wxtab\0"
-1 1 8 #"wximage\0"
-2 0 8 #"wxmedia\0"
-4 1 34 #"(lib \"syntax-browser.ss\" \"mrlib\")\0"
-1 0 36 #"(lib \"cache-image-snip.ss\" \"mrlib\")\0"
-1 0 68
-(
- #"((lib \"image-core.ss\" \"mrlib\") (lib \"image-core-wxme.rkt\" \"mr"
- #"lib\"))\0"
-) 1 0 16 #"drscheme:number\0"
-3 0 44 #"(lib \"number-snip.ss\" \"drscheme\" \"private\")\0"
-1 0 36 #"(lib \"comment-snip.ss\" \"framework\")\0"
-1 0 93
-(
- #"((lib \"collapsed-snipclass.ss\" \"framework\") (lib \"collapsed-sni"
- #"pclass-wxme.ss\" \"framework\"))\0"
-) 0 0 43 #"(lib \"collapsed-snipclass.ss\" \"framework\")\0"
-0 0 19 #"drscheme:sexp-snip\0"
-0 0 29 #"drscheme:bindings-snipclass%\0"
-1 0 101
-(
- #"((lib \"ellipsis-snip.rkt\" \"drracket\" \"private\") (lib \"ellipsi"
- #"s-snip-wxme.rkt\" \"drracket\" \"private\"))\0"
-) 2 0 88
-(
- #"((lib \"pict-snip.rkt\" \"drracket\" \"private\") (lib \"pict-snip.r"
- #"kt\" \"drracket\" \"private\"))\0"
-) 0 0 55
-#"((lib \"snip.rkt\" \"pict\") (lib \"snip-wxme.rkt\" \"pict\"))\0"
-1 0 34 #"(lib \"bullet-snip.rkt\" \"browser\")\0"
-0 0 25 #"(lib \"matrix.ss\" \"htdp\")\0"
-1 0 22 #"drscheme:lambda-snip%\0"
-1 0 29 #"drclickable-string-snipclass\0"
-0 0 26 #"drracket:spacer-snipclass\0"
-0 0 57
-#"(lib \"hrule-snip.rkt\" \"macro-debugger\" \"syntax-browser\")\0"
-1 0 26 #"drscheme:pict-value-snip%\0"
-0 0 45 #"(lib \"image-snipr.ss\" \"slideshow\" \"private\")\0"
-1 0 38 #"(lib \"pict-snipclass.ss\" \"slideshow\")\0"
-2 0 55 #"(lib \"vertical-separator-snip.ss\" \"stepper\" \"private\")\0"
-1 0 18 #"drscheme:xml-snip\0"
-1 0 31 #"(lib \"xml-snipclass.ss\" \"xml\")\0"
-1 0 21 #"drscheme:scheme-snip\0"
-2 0 34 #"(lib \"scheme-snipclass.ss\" \"xml\")\0"
-1 0 10 #"text-box%\0"
-1 0 32 #"(lib \"text-snipclass.ss\" \"xml\")\0"
-1 0 1 6 #"wxloc\0"
-          0 0 83 0 1 #"\0"
-0 75 1 #"\0"
-0 12 90 -1 90 -1 3 -1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 255 255 255 1 -1 0 9
-#"Standard\0"
-0 75 6 #"Menlo\0"
-0 12 90 -1 90 -1 3 -1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 255 255 255 1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 -1 -1 2 24
-#"framework:default-color\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
-1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 150 0 150 0 0 0 -1 -1 2 15
-#"text:ports out\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 192 46 214 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 93 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 255 0 0 0 0 0 -1
--1 2 15 #"text:ports err\0"
-0 -1 1 #"\0"
-1 0 -1 -1 93 -1 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 175 0 0 0 -1 -1 2 17
-#"text:ports value\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 57 89 216 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1.0 0 92 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 34 139 34 0 0 0 -1
--1 2 27 #"Matching Parenthesis Style\0"
-0 -1 1 #"\0"
-1.0 0 92 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 34 139 34 0 0 0 -1
--1 2 1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 38 38 128 0 0 0 -1 -1 2 37
-#"framework:syntax-color:scheme:symbol\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 102 102 255 0 0 0 -1 -1 2
-38 #"framework:syntax-color:scheme:keyword\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 102 102 255 0 0 0 -1 -1 2
-1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 194 116 31 0 0 0 -1 -1 2
-38 #"framework:syntax-color:scheme:comment\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 249 148 40 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 41 128 38 0 0 0 -1 -1 2 37
-#"framework:syntax-color:scheme:string\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 51 174 51 0 0 0 -1 -1 2 35
-#"framework:syntax-color:scheme:text\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 51 174 51 0 0 0 -1 -1 2 39
-#"framework:syntax-color:scheme:constant\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 60 194 57 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 132 60 36 0 0 0 -1 -1 2 49
-#"framework:syntax-color:scheme:hash-colon-keyword\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 151 69 43 0 0 0 -1 -1 2 42
-#"framework:syntax-color:scheme:parenthesis\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 151 69 43 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 36
-#"framework:syntax-color:scheme:error\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 -1 -1 2 36
-#"framework:syntax-color:scheme:other\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
-16 #"Misspelled Text\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
-1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 81 112 203 0 0 0 -1 -1 2
-38 #"drracket:check-syntax:lexically-bound\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 50 163 255 0 0 0 -1 -1 2 1
-#"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 178 34 34 0 0 0 -1 -1 2 28
-#"drracket:check-syntax:set!d\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 192 203 0 0 0 -1 -1 2
-37 #"drracket:check-syntax:unused-require\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 192 203 0 0 0 -1 -1 2
-36 #"drracket:check-syntax:free-variable\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 192 203 0 0 0 -1 -1 2
-1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 68 0 203 0 0 0 -1 -1 2 31
-#"drracket:check-syntax:imported\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 166 0 255 0 0 0 -1 -1 2 47
-#"drracket:check-syntax:my-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 192 203 0 0 0 -1 -1 2
-1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 0 116 0 0 0 0 -1 -1 2 50
-#"drracket:check-syntax:their-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 50 205 50 0 0 0 -1 -1 2 48
-#"drracket:check-syntax:unk-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
-1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 139 142 28 0 0 0 -1 -1 2
-49 #"drracket:check-syntax:both-obligation-style-pref\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 240 230 140 0 0 0 -1 -1 2
-26 #"plt:htdp:test-coverage-on\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
-1 #"\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 1 0 0 0 0 0 0 255 165 0 0 0 0 -1 -1 2 27
-#"plt:htdp:test-coverage-off\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 1 0 0 0 0 0 0 205 92 92 0 0 0 -1 -1 4 1
-#"\0"
-0 70 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 4 4 #"XML\0"
-0 70 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 2 37 #"plt:module-language:test-coverage-on\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
-38 #"plt:module-language:test-coverage-off\0"
-0 -1 1 #"\0"
-1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 1 0 0 0 0 0 0 205 92 92 0 0 0 -1 -1 4 1
-#"\0"
-0 71 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 1 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 0 255 0 0 0 -1
--1 4 1 #"\0"
-0 71 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 1 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 0 255 0 0 0 -1
--1 4 1 #"\0"
-0 71 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 100 0 0 0 0 -1
--1 0 1 #"\0"
-0 75 6 #"Menlo\0"
-0.0 12 90 -1 90 -1 3 -1 0 1 0 1 0 0 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
-255 255 1 -1 2 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 2 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 150 0 150 0
-0 0 -1 -1 2 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 93 -1 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 255 0 0 0 0
-0 -1 -1 2 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 0 0 175 0 0
-0 -1 -1 2 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 200 0 0 0 0
-0 -1 -1 4 32 #"widget.rkt::browser-text% basic\0"
-0 70 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 4 59
-#"macro-debugger/syntax-browser/properties color-text% basic\0"
-0 70 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 62 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 190 190 190
-0 0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 0 0 0 0 0 0
--1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 255 0 0 0 0
-0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 0 0 255 0 0
-0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 107 142 35 0
-0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 0 100 0 0 0
-0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 139 0 0 0 0
-0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 100 149 237
-0 0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 65 105 225 0
-0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 70 130 180 0
-0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 47 79 79 0 0
-0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 0 0 139 0 0
-0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 75 0 130 0 0
-0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 160 32 240 0
-0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 255 165 0 0
-0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 250 128 114
-0 0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 184 134 11 0
-0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 128 128 0 0
-0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 169 169 169
-0 0 0 -1 -1 4 1 #"\0"
-0 -1 1 #"\0"
-1.0 0 92 -1 -1 -1 -1 -1 0 0 0 0 0 1 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
-255 0 -1 -1           0 933 0 17 3 44
-#"; =========================================="
-0 0 24 29 1 #"\n"
-0 0 17 3 21 #"; Interpreter, Part 1"
-0 0 24 29 1 #"\n"
-0 0 17 3 42 #"; EECS 345 - Programming Language Concepts"
-0 0 24 29 1 #"\n"
-0 0 17 3 1 #";"
-0 0 24 29 1 #"\n"
-0 0 17 3 9 #"; Group 8"
-0 0 24 29 1 #"\n"
-0 0 17 3 16 #"; Jaafar Bennani"
-0 0 24 29 1 #"\n"
-0 0 17 3 11 #"; Alex Hemm"
-0 0 24 29 1 #"\n"
-0 0 17 3 15 #"; Kyle Thompson"
-0 0 24 29 1 #"\n"
-0 0 17 3 44 #"; =========================================="
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 7 #"require"
-0 0 24 3 1 #" "
-0 0 19 3 18 #"\"simpleParser.scm\""
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 7 #"require"
-0 0 24 3 1 #" "
-0 0 19 3 18 #"\"Abstractions.scm\""
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 11 #"; interpret"
-0 0 24 29 1 #"\n"
-0 0 17 3 124
-(
- #"; Given a filename of Java/C-like code, use simpleParser to parse th"
- #"e file and then get the value that block of code returns"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"interpret"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"filename"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 14 3 7 #"call/cc"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"     ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 6 #"return"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"       "
-0 0 17 3 28 #"; The initial state is empty"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"       ("
-0 0 14 3 12 #"M_state_list"
-0 0 24 3 2 #" ("
-0 0 14 3 6 #"parser"
-0 0 24 3 1 #" "
-0 0 14 3 8 #"filename"
-0 0 24 3 3 #") ("
-0 0 14 3 9 #"initstate"
-0 0 24 3 2 #") "
-0 0 14 3 4 #"null"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"return"
-0 0 24 3 5 #")))))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 14 #"; M_state_list"
-0 0 24 29 1 #"\n"
-0 0 17 3 94
-(
- #"; Given a list of statements and a state, evaluate each line with M_"
- #"state and return the state"
-) 0 0 24 29 1 #"\n"
-0 0 17 3 36 #"; after each line has been evaluated"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 12 #"M_state_list"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"stmt-lis"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"nextstate"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"return"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 15 3 4 #"cond"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 5 #"null?"
-0 0 24 3 1 #" "
-0 0 14 3 8 #"stmt-lis"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 4 #"else"
-0 0 24 3 2 #" ("
-0 0 14 3 12 #"M_state_list"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"next"
-0 0 24 3 1 #" "
-0 0 14 3 8 #"stmt-lis"
-0 0 24 3 3 #") ("
-0 0 14 3 7 #"M_state"
-0 0 24 3 2 #" ("
-0 0 14 3 5 #"first"
-0 0 24 3 1 #" "
-0 0 14 3 8 #"stmt-lis"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"return"
-0 0 24 3 2 #") "
-0 0 14 3 6 #"return"
-0 0 24 3 5 #")))))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 9 #"; M_state"
-0 0 24 29 1 #"\n"
-0 0 17 3 80
-(
- #"; Given a statement and a state, evaluate the statement and return t"
- #"he new state"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 7 #"M_state"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"stmt"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"return"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 15 3 4 #"cond"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 17 3 127
-(
- #"; Ensure that the statement is an expression that can be evaluated, "
- #"ie returns the same state is the input is not an expression"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 3 #"not"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"exp?"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #")) "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 17 3 41 #"; Check if the statement returns a value "
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 3 #"eq?"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 21 3 1 #"'"
-0 0 14 3 6 #"return"
-0 0 24 3 3 #") ("
-0 0 14 3 6 #"return"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"realvalue"
-0 0 24 3 2 #" ("
-0 0 14 3 7 #"M_value"
-0 0 24 3 2 #" ("
-0 0 14 3 10 #"return-exp"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 4 #"))))"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 17 3 34 #"; Check if the statement branches "
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 3 #"eq?"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 21 3 1 #"'"
-0 0 14 3 5 #"while"
-0 0 24 3 3 #") ("
-0 0 14 3 13 #"M_state_while"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 4 #"body"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"return"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 3 #"eq?"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 21 3 1 #"'"
-0 0 14 3 2 #"if"
-0 0 24 3 3 #") ("
-0 0 14 3 10 #"M_state_if"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 4 #"then"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 4 #"else"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"return"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 4 #"else"
-0 0 24 3 2 #" ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 5 #")))))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 21 #"; M_state_side_effect"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"stmt"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"     ("
-0 0 15 3 4 #"cond"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 17 3 127
-(
- #"; Ensure that the statement is an expression that can be evaluated, "
- #"ie returns the same state is the input is not an expression"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 3 #"not"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"exp?"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #")) "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 17 3 43 #"; Check if the statement reassigns a value "
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 3 #"eq?"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 21 3 1 #"'"
-0 0 14 3 1 #"="
-0 0 24 3 3 #") ("
-0 0 14 3 14 #"M_state_assign"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"var-name"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 7 #"M_value"
-0 0 24 3 2 #" ("
-0 0 14 3 10 #"assignment"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #") ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 2 #" ("
-0 0 14 3 10 #"assignment"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #")))"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 17 3 47 #"; Check if the statement creates a new variable"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 3 #"eq?"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 21 3 1 #"'"
-0 0 14 3 3 #"var"
-0 0 24 3 3 #") ("
-0 0 14 3 15 #"M_state_declare"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"var-name"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 7 #"M_value"
-0 0 24 3 2 #" ("
-0 0 14 3 10 #"assignment"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #") ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 2 #" ("
-0 0 14 3 10 #"assignment"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #")))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 24 3 6 #"      "
-0 0 17 3 54 #"; Check if the statement is another kind of expression"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 13 #"single_value?"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand1"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 11 #"dual_value?"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 4 #")) ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand2"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand1"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #")))"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 4 #"else"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 4 #"))))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 9 #"; M_value"
-0 0 24 29 1 #"\n"
-0 0 17 3 77
-(
- #"; Given a statement and a state, retrieve the value returned by the "
- #"statement"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 7 #"M_value"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 4 #"stmt"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 15 3 4 #"cond"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 4 #"exp?"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 10 #"M_evaluate"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 11 #"null_value?"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 9 #"nullvalue"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 2 #"or"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"boolean?"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 7 #"number?"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #")) "
-0 0 14 3 4 #"stmt"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 10 #"boolvalue?"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 9 #"boolvalue"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 4 #"else"
-0 0 24 3 2 #" ("
-0 0 14 3 6 #"lookup"
-0 0 24 3 1 #" "
-0 0 14 3 4 #"stmt"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 5 #")))))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 11 #"; M_boolean"
-0 0 24 29 1 #"\n"
-0 0 17 3 82
-(
- #"; Given a boolean statement and a state, return the boolean value of"
- #" the statement"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"M_boolean"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 6 #"b-stmt"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 15 3 4 #"cond"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 4 #"exp?"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"b-stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 10 #"M_evaluate"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"b-stmt"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 8 #"boolean?"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"b-stmt"
-0 0 24 3 2 #") "
-0 0 14 3 6 #"b-stmt"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 10 #"boolvalue?"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"b-stmt"
-0 0 24 3 3 #") ("
-0 0 14 3 9 #"boolvalue"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"b-stmt"
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 4 #"else"
-0 0 24 3 2 #" ("
-0 0 14 3 11 #"bool-lookup"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"b-stmt"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 5 #")))))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 12 #"; M_evaluate"
-0 0 24 29 1 #"\n"
-0 0 17 3 116
-(
- #"; Given an expression and a state, perform the necessary operations "
- #"given by the expression and return the new state"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 10 #"M_evaluate"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 3 #"exp"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 15 3 4 #"cond"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 7 #"unary-?"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 3 #") ("
-0 0 14 3 1 #"-"
-0 0 24 3 1 #" "
-0 0 21 3 1 #"0"
-0 0 24 3 2 #" ("
-0 0 14 3 7 #"M_value"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand1"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #")))"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 3 #"eq?"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 2 #") "
-0 0 21 3 1 #"'"
-0 0 14 3 1 #"!"
-0 0 24 3 3 #") ("
-0 0 14 3 3 #"not"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"M_boolean"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand1"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #")))"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 3 #"eq?"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 2 #") "
-0 0 21 3 1 #"'"
-0 0 14 3 1 #"="
-0 0 24 3 3 #") ("
-0 0 14 3 7 #"M_value"
-0 0 24 3 2 #" ("
-0 0 14 3 10 #"assignment"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 3 #") ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 2 #" ("
-0 0 14 3 10 #"assignment"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #")))"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 9 #"value_op?"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 4 #")) ("
-0 0 14 3 9 #"operation"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 3 #") ("
-0 0 14 3 7 #"M_value"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand1"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #") ("
-0 0 14 3 7 #"M_value"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand2"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 3 #") ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand1"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 4 #"))))"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 8 #"bool_op?"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 4 #")) ("
-0 0 14 3 9 #"operation"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operator"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 3 #") ("
-0 0 14 3 9 #"M_boolean"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand1"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #") ("
-0 0 14 3 9 #"M_boolean"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand2"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 3 #") ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 2 #" ("
-0 0 14 3 8 #"operand1"
-0 0 24 3 1 #" "
-0 0 14 3 3 #"exp"
-0 0 24 3 2 #") "
-0 0 14 3 1 #"s"
-0 0 24 3 4 #"))))"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 4 #"else"
-0 0 24 3 2 #" ("
-0 0 14 3 5 #"error"
-0 0 24 3 1 #" "
-0 0 19 3 1 #"\""
-0 0 19 3 10 #"Expression"
-0 0 19 3 1 #" "
-0 0 19 3 2 #"id"
-0 0 19 3 1 #" "
-0 0 19 3 3 #"not"
-0 0 19 3 7 #" valid\""
-0 0 24 3 5 #")))))"
-0 0 24 29 1 #"\n"
-0 0 24 3 1 #" "
-0 0 24 29 1 #"\n"
-0 0 17 3 12 #"; M_state_if"
-0 0 24 29 1 #"\n"
-0 0 17 3 84
-(
- #"; Given a condition, its relevant then and else statements, and a st"
- #"ate, return the "
-) 0 0 24 29 1 #"\n"
-0 0 17 3 73
-(
- #"; new state with the relevant statement evaluated, based on the cond"
- #"ition"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 10 #"M_state_if"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 14 #"then-statement"
-0 0 24 3 1 #" "
-0 0 14 3 14 #"else-statement"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"return"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 14 3 2 #"if"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"M_boolean"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 7 #"M_state"
-0 0 24 3 1 #" "
-0 0 14 3 14 #"then-statement"
-0 0 24 3 2 #" ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 2 #") "
-0 0 14 3 6 #"return"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 7 #"M_state"
-0 0 24 3 1 #" "
-0 0 14 3 14 #"else-statement"
-0 0 24 3 2 #" ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 2 #") "
-0 0 14 3 6 #"return"
-0 0 24 3 4 #"))))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 15 #"; M_state_while"
-0 0 24 29 1 #"\n"
-0 0 17 3 93
-(
- #"; Given a condition, body, and state, recursively update the state u"
- #"ntil the condition is met"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 13 #"M_state_while"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 14 #"body-statement"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"return"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 14 3 2 #"if"
-0 0 24 3 2 #" ("
-0 0 14 3 9 #"M_boolean"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 13 #"M_state_while"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 14 #"body-statement"
-0 0 24 3 2 #" ("
-0 0 14 3 7 #"M_state"
-0 0 24 3 1 #" "
-0 0 14 3 14 #"body-statement"
-0 0 24 3 2 #" ("
-0 0 14 3 19 #"M_state_side_effect"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 2 #") "
-0 0 14 3 6 #"return"
-0 0 24 3 2 #") "
-0 0 14 3 6 #"return"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 7 #"M_state"
-0 0 24 3 1 #" "
-0 0 14 3 9 #"condition"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #" "
-0 0 14 3 6 #"return"
-0 0 24 3 4 #"))))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 16 #"; M_state_assign"
-0 0 24 29 1 #"\n"
-0 0 17 3 64
-#"; Given a variable name, value, and a state, update the state so"
-0 0 24 29 1 #"\n"
-0 0 17 3 69
-(
- #"; that the value of the variable of the given name is the given valu"
- #"e"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 14 #"M_state_assign"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 7 #"varname"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"value"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 14 3 13 #"replace-value"
-0 0 24 3 1 #" "
-0 0 14 3 7 #"varname"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"value"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #")))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0 0 17 3 17 #"; M_state_declare"
-0 0 24 29 1 #"\n"
-0 0 17 3 154
-(
- #"; takes in a varriable, a value, and a state , checks if the varriab"
- #"le has already beed declared, and adds the varriable to the state wi"
- #"th the value given"
-) 0 0 24 29 1 #"\n"
-0 0 24 3 1 #"("
-0 0 15 3 6 #"define"
-0 0 24 3 1 #" "
-0 0 14 3 15 #"M_state_declare"
-0 0 24 29 1 #"\n"
-0 0 24 3 3 #"  ("
-0 0 15 3 6 #"lambda"
-0 0 24 3 2 #" ("
-0 0 14 3 7 #"varname"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"value"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 1 #")"
-0 0 24 29 1 #"\n"
-0 0 24 3 5 #"    ("
-0 0 15 3 4 #"cond"
-0 0 24 29 1 #"\n"
-0 0 24 3 8 #"      (("
-0 0 14 3 6 #"exist?"
-0 0 24 3 1 #" "
-0 0 14 3 7 #"varname"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 3 #") ("
-0 0 14 3 5 #"error"
-0 0 24 3 1 #" "
-0 0 19 3 12 #"\"Redefining\""
-0 0 24 3 2 #"))"
-0 0 24 29 1 #"\n"
-0 0 24 3 7 #"      ("
-0 0 14 3 4 #"else"
-0 0 24 3 2 #" ("
-0 0 14 3 10 #"insert-var"
-0 0 24 3 1 #" "
-0 0 14 3 7 #"varname"
-0 0 24 3 1 #" "
-0 0 14 3 5 #"value"
-0 0 24 3 1 #" "
-0 0 14 3 1 #"s"
-0 0 24 3 5 #")))))"
-0 0 24 29 1 #"\n"
-0 0 24 29 1 #"\n"
-0           0
-=======
 ; ==========================================
 ; Interpreter, Part 2
 ; EECS 345 - Programming Language Concepts
@@ -1302,38 +19,44 @@
     (call/cc
      (lambda (return)
        ; The initial state is empty
-       (M_state_list (parser filename) (initstate) return)))))
+       (M_state_list (parser filename) (initstate) (goto-setup 'return return initgoto))))))
 
 ; M_state_list
 ; Given a list of statements and a state, evaluate each line with M_state and return the state
 ; after each line has been evaluated
 (define M_state_list
-  (lambda (stmt-lis s return)
+  (lambda (stmt-lis s goto)
     (cond
       ((null? stmt-lis) s)
-      (else (M_state_list (next stmt-lis) (M_state (first stmt-lis) s  return) return)))))
+      (else (M_state_list (next stmt-lis) (M_state (first stmt-lis) s  goto) goto)))))
 
 ; M_state
 ; Given a statement and a state, evaluate the statement and return the new state
 (define M_state
-  (lambda (stmt s return)
+  (lambda (stmt s goto)
     (cond
       ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
       ((not (exp? stmt)) s)
 
-      ; Check if the statement returns a value 
-      ((eq? (operator stmt) 'return) (return (realvalue (M_value (return-exp stmt) s))))
+      ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) s))))
+
+      ((eq? (operator stmt) 'throw) (goto 'throw (throws (realvalue (M_value (return-exp stmt) s)) s)))
+
+      ((state-goto? (operator stmt)) (goto (operator stmt) s))
+
+      ((eq? (operator stmt) 'try) (M_state_try stmt s goto))
       
       ; Check if the statement branches 
-      ((eq? (operator stmt) 'while) (M_state_while (condition stmt) (body stmt) s return))
-      ((eq? (operator stmt) 'if) (M_state_if (condition stmt) (then stmt) (else stmt) s return))
+      ((eq? (operator stmt) 'while) (M_state_while-start (condition stmt) (body stmt) s goto))
+      ((eq? (operator stmt) 'if) (M_state_if (condition stmt) (then stmt) (else stmt) s goto))
 
-      ; Check if the statement is a block of code contained in curly brackets, defined by "begin" in the parser
-      ((eq? (operator stmt) 'begin) (M_remove_layer (M_add_layer (block-body stmt) s return) return))
+      ; Check if the statement is a block of code, defined by "begin" in the parser
+      ((eq? (operator stmt) 'begin) (M_state_block (block-body stmt) s goto))
       
       (else (M_state_side_effect stmt s)))))
 
 ; M_state_side_effect
+; Given a statement and a state, look through the statement to see if it will affect any other parts of the state, and if it does, return the new state
 (define M_state_side_effect
   (lambda (stmt s)
     (cond
@@ -1350,6 +73,95 @@
       ((single_value? stmt) (M_state_side_effect (operand1 stmt) s))
       ((dual_value? (operator stmt)) (M_state_side_effect (operand2 stmt) (M_state_side_effect (operand1 stmt) s)))
       (else s))))
+
+; M_state_block
+; Given a list of statements contained within curly braces {} in the original code, iterate through the block, executing each line,
+; and storing a goto value to keep track of where the line of execution should go after the block is completed
+(define M_state_block
+  (lambda (stmt-lis s goto)
+    ; Each block of code exists within its own layer on top of the state, which must be removed after the block is completed
+    (remove_layer (M_state_list stmt-lis (add_layer s) (block_goto goto)))))
+
+; M_state_assign
+; Given a variable name, value, and a state, update the state so
+; that the value of the variable of the given name is the given value
+(define M_state_assign
+  (lambda (varname value s)
+    (replace-value varname value s)))
+
+; M_state_declare
+; takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
+(define M_state_declare
+  (lambda (varname value s)
+    (cond
+      ((exist-top? varname s) (error "Redefining"))
+      (else (insert-var varname value s)))))
+
+; M_state_if
+; Given a condition, its relevant then and else statements, and a state, return the 
+; new state with the relevant statement evaluated, based on the condition
+(define M_state_if
+  (lambda (condition then-statement else-statement s goto)
+    (if (M_boolean condition s)
+      (M_state then-statement s goto)
+      (M_state else-statement s goto))))
+
+; M_state_while-start
+; A helper function for M_state_while using the current continuation to keep track of the state
+(define M_state_while-start
+  (lambda (condition body-statement s goto)
+    (call/cc
+     (lambda (break)
+       (M_state_while condition body-statement s (goto-setup 'break break goto))))))
+
+; M_state_while
+; Given a condition, body, and state, recursively update the state until the condition is met
+(define M_state_while
+  (lambda (condition body-statement s goto)
+    (if (M_boolean condition s)
+      (M_state_while condition body-statement (M_state-continue body-statement s goto) goto)
+      s)))
+
+; M_state_continue
+; Given a statement, state, and a point to jump to within a given loop of iteration, return to the top of the loop
+(define M_state-continue
+  (lambda (stmt s goto)
+    (call/cc
+     (lambda (continue)
+       (M_state stmt s (goto-setup 'continue continue goto))))))
+
+; M_state_try
+; Given a block of code that contains a portion of a try/catch block, a state, and a point to go to,
+; go to the correct portion of the code based on the portion of the try/catch block
+(define M_state_try
+  (lambda (stmt s goto)
+    (cond
+      ((and (catch? stmt) (finally? stmt)) (M_state_block (finally-body stmt) (M_state_try_with-catch stmt s goto) goto))
+      ((catch? stmt) (M_state_try_with-catch stmt s goto))
+      ((finally? stmt) (M_state_block (finally-body stmt) (M_state_try_without-catch (try-body stmt) s goto) goto))
+      (else (M_state_try_without-catch (try-body stmt) s goto)))))
+
+; M_state_try_without-catch
+; Given a statement, state, and branching point, attempt to execute the statement as a block of code and if an error occurs, jump to the goto point
+(define M_state_try_without-catch
+  (lambda (stmt s goto)
+    (call/cc
+     (lambda (throw)
+       (M_state_block stmt s (goto-setup 'throw (lambda (t) (throw (throw-state t))) goto))))))
+
+; M_state_try_with-catch
+; Given a statement, state, and branching point, attempt to execute the statement as a block of code but if an error occurs, jump to the associated catch statement
+(define M_state_try_with-catch
+  (lambda (stmt s goto)
+    (call/cc
+     (lambda (throw)
+       (M_state_block (try-body stmt) s (goto-setup 'throw (lambda (t) (throw (M_state_catch stmt (throw-value t) (remove_layer (throw-state t)) goto))) goto))))))
+
+; M_state_catch
+; Execute a block of code that is associated with a try block and handle any errors that occurred during execution of the try block
+(define M_state_catch
+  (lambda (stmt e s goto)
+    (M_state_block (catch-body stmt) (M_state_declare (catch-var stmt) e s) goto)))
 
 ; M_value
 ; Given a statement and a state, retrieve the value returned by the statement
@@ -1370,7 +182,7 @@
       ((exp? b-stmt) (M_evaluate b-stmt s))
       ((boolean? b-stmt) b-stmt)
       ((boolvalue? b-stmt) (boolvalue b-stmt))
-      (else (bool-lookup b-stmt s)))))
+      (else (lookup b-stmt s)))))
 
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state
@@ -1383,43 +195,4 @@
       ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s) (M_value (operand2 exp) (M_state_side_effect (operand1 exp) s))))
       ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s) (M_boolean (operand2 exp) (M_state_side_effect (operand1 exp) s))))
       (else (error "Expression id not valid")))))
- 
-; M_state_if
-; Given a condition, its relevant then and else statements, and a state, return the 
-; new state with the relevant statement evaluated, based on the condition
-(define M_state_if
-  (lambda (condition then-statement else-statement s return)
-    (if (M_boolean condition s)
-      (M_state then-statement (M_state_side_effect condition s) return)
-      (M_state else-statement (M_state_side_effect condition s) return))))
 
-; M_state_while
-; Given a condition, body, and state, recursively update the state until the condition is met
-(define M_state_while
-  (lambda (condition body-statement s return)
-    (if (M_boolean condition s)
-      (M_state_while condition body-statement (M_state body-statement (M_state_side_effect condition s) return) return)
-      (M_state condition s return))))
-
-; M_state_assign
-; Given a variable name, value, and a state, update the state so
-; that the value of the variable of the given name is the given value
-(define M_state_assign
-  (lambda (varname value s)
-    (replace-value varname value s)))
-
-; M_state_declare
-; takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
-(define M_state_declare
-  (lambda (varname value s)
-    (cond
-      ((exist? varname s) (error "Redefining"))
-      (else (insert-var varname value s)))))
-
-
-; M_add_layer
-(define M_add_layer
-  (lambda stmt-list s return
-    (return 
-
->>>>>>> 8a9cf8bc48d5629d1263f18728ad29bb05fbda99
