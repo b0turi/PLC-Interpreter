@@ -3,7 +3,7 @@
 ; Interpreter, Part 3
 ; EECS 345 - Programming Language Concepts
 ;
-; Group 8
+; Group 23
 ; Jaafar Bennani
 ; Alex Hemm
 ; Kyle Thompson
@@ -37,7 +37,7 @@
 ; M_state_declare
 ; takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
 (define M_state_declare
-  (lambda (varname value s goto)
+  (lambda (varname value s)
     (cond
       ((exist-top? varname s) (error "Redefining"))
       (else (insert-var varname value s)))))
@@ -49,9 +49,9 @@
   (lambda (fname args s goto)
     (call/cc
      (lambda (return)
-    (cond
-      ((not (exist? fname s)) (error "Function does not exist"))
-      (else (M_state_list (closure-body (lookup fname s)) (fsetup (closure-params (lookup fname s)) args (add_layer (remove-layer fname s))) (goto-setup 'return (gotoreturn return s) (func-goto goto)))))))))
+       (cond
+         ((not (exist? fname s)) (error "Function does not exist"))
+         (else (begin (M_state_list (closure-body (lookup fname s)) (remove-layer fname (fsetup (closure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return (gotoreturn return s) (func-goto s goto))) s)))))))
 
 ; M_state_if
 ; Given a condition, its relevant then and else statements, and a state, return the 
@@ -69,7 +69,7 @@
   (lambda (stmt-lis s goto)
     (cond
       ((null? stmt-lis) s)
-      (else (M_state_list (next stmt-lis) (M_state (first stmt-lis) s  goto) goto)))))
+      (else (M_state_list (next stmt-lis) (M_state (first stmt-lis) s goto) goto)))))
 
 ; M_state_main
 ; Given an environment and a goto continuation,
@@ -87,10 +87,10 @@
       ((not (exp? stmt)) s)
       
       ; Check if the statement creates a new variable
-      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto) goto))
+      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto)))
       
       ; Check if the statement is a function declaration
-      ((eq? (operator stmt) 'function) (M_state_declare (var-name stmt) (closure (function-parameters stmt) (function-body stmt)) s goto))
+      ((eq? (operator stmt) 'function) (M_state_declare (var-name stmt) (closure (function-parameters stmt) (function-body stmt)) s))
 
       ; Check if the statement is a branching statement with a goto
       ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) (M_state_side-effect (assignment stmt) s goto) goto))))
@@ -106,7 +106,7 @@
       ((eq? (operator stmt) 'begin) (M_state_block (block-body stmt) s goto))
       
       ; Check if a function is being called
-      ((eq? (operator stmt) 'funcall) (M_state_function (function-name stmt) (M_value_list (function-arguments stmt) s goto) s goto))
+      ((eq? (operator stmt) 'funcall) (M_state_function (function-name stmt) (function-arguments stmt) s goto))
       
       (else (M_state_side-effect stmt s goto)))))
 
@@ -120,9 +120,6 @@
       ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
       ((not (exp? stmt)) s)
       
-      ; Check if the statement creates a new variable
-      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto) goto))
-
       ; Check if the statement reassigns a value 
       ((eq? (operator stmt) '=) (M_state_assign (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto) goto))
   
@@ -186,7 +183,7 @@
 ; Execute a block of code that is associated with a try block and handle any errors that occurred during execution of the try block
 (define M_state_catch
   (lambda (stmt e s goto)
-    (M_state_block (catch-body stmt) (M_state_declare (catch-var stmt) e s goto) goto)))
+    (M_state_block (catch-body stmt) (M_state_declare (catch-var stmt) e s) goto)))
 
 
 ; M_boolean
@@ -219,22 +216,7 @@
      (lambda (return)
        (cond
          ((not (exist? fname s)) (error "Function does not exist"))
-         (else (M_state_list (closure-body (lookup fname s)) (fsetup (closure-params (lookup fname s)) args (add_layer (remove-layer fname s))) (goto-setup 'return return (func-goto goto)))))))))
-
-; M_value_list
-; Given a list of values, a state, and a goto continuation,
-; return a new list of values that contains the evaluated value of each term, accounting for function calls
-(define M_value_list
-  (lambda (value-list s goto)
-    (value_list-cps value-list s goto (lambda (v) v))))
-
-; value_list-cps
-; A continuation passing style helper for M_value_list
-(define value_list-cps
-  (lambda (value-list s goto return)
-    (cond
-      ((null? value-list) (return value-list))
-      (else (value_list-cps (cdr value-list) s goto (lambda (v) (return (cons (M_value (car value-list) (M_state_side-effect (car value-list) s goto) goto) v))))))))
+         (else (M_state_list (closure-body (lookup fname s)) (remove-layer fname (fsetup (closure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return return (func-goto s goto)))))))))
 
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state
@@ -242,7 +224,7 @@
   (lambda (exp s goto)
     (cond
       ; Check if a function is being called
-      ((eq? (operator exp) 'funcall) (M_value_function (function-name exp) (M_value_list (function-arguments exp) s goto) s goto))
+      ((eq? (operator exp) 'funcall) (M_value_function (function-name exp) (function-arguments exp) s goto))
       
       ((unary-? exp) (- 0 (M_value (operand1 exp) s goto)))
       ((eq? (operator exp) '!) (not (M_boolean (operand1 exp) s goto)))
@@ -252,3 +234,21 @@
       
       (else (error "Expression id not valid")))))
 
+; fsetup
+; Given a list of parameters, arguments, and a state, add each of the parameters into the state
+; populated with the argument values, and return the new state
+(define fsetup
+  (lambda (params args s goto)
+    (cond
+      ((> (fparam-length params) (length args)) (error "Too few arguments"))
+      ((< (fparam-length params) (length args)) (error "Too many arguments"))
+      (else (fsetup-cps params args s goto (lambda (v) v))))))
+
+; fsetup-cps
+; A continuation passing style helper for fsetup
+(define fsetup-cps
+  (lambda (params args s goto return)
+    (cond
+      ((null? params) (return s))
+      ((eq? '& (car params)) (fsetup-cps (cddr params) (cdr args) (M_state_side-effect (car args) s goto) goto (lambda (v) (return (rinsert-var (cadr params) (rlookup (car args) s) v)))))
+      (else (fsetup-cps (cdr params) (cdr args) (M_state_side-effect (car args) s goto) goto (lambda (v) (return (insert-var (car params) (M_value (car args) s goto) v))))))))

@@ -3,7 +3,7 @@
 ; Abstractions, Part 3
 ; EECS 345 - Programming Language Concepts
 ;
-; Group 8
+; Group 23
 ; Jaafar Bennani
 ; Alex Hemm
 ; Kyle Thompson
@@ -174,6 +174,13 @@
   (lambda (varname value s)
     (cons (list (cons varname (caar s)) (cons (box value) (cadar s))) (cdr s))))
 
+; rinsert-var
+; Given a variable name, value, and a state, insert the variable with the given value into the state,
+; accounting for boolean literals, and return the new state with the variable added
+(define rinsert-var
+  (lambda (varname box s)
+    (cons (list (cons varname (caar s)) (cons box (cadar s))) (cdr s))))
+
 ; replace-value
 ; Given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
 (define replace-value
@@ -208,29 +215,13 @@
 ; An alternate version of remove_layer that removes a specific state for a function
 (define remove-layer
   (lambda (fname s)
+    (cons (car s) (remove-layer-helper fname (cdr s)))))
+
+(define remove-layer-helper
+  (lambda (fname s)
     (cond
-      ((null? s) (error "No layers present"))
       ((exist-top? fname s) s)
-      (else (cdr s)))))
-
-; fsetup
-; Given a list of parameters, arguments, and a state, add each of the parameters into the state
-; populated with the argument values, and return the new state
-(define fsetup
-  (lambda (params args s)
-    (cond
-      ((> (length params) (length args)) (error "Too few arguments"))
-      ((< (length params) (length args)) (error "Too many arguments"))
-      (else (fsetup-cps params args s (lambda (v) v))))))
-
-; fsetup-cps
-; A continuation passing style helper for fsetup
-(define fsetup-cps
-  (lambda (params args s return)
-    (cond
-      ((null? params) (return s))
-      (else (fsetup-cps (cdr params) (cdr args) (insert-var (car params) (car args) s) return)))))
-
+      (else (remove-layer-helper fname (cdr s))))))
 
 ; ===== Lookup =====
 ; lookup
@@ -251,6 +242,25 @@
       ((and (eq? name (car namelis)) (null_value? (car valuelis))) (error "using before assigning"))
       ((eq? name (car namelis)) (return (unbox (car valuelis))))
       (else (lookup-cps name (cdr namelis) (cdr valuelis) return break)))))
+
+; rlookup
+; Given a variable name and a state, check if that variable is defined in that state.
+; Throws and appropriate error if the variable doesn't exist in the state or is uninitialized
+(define rlookup
+  (lambda (varname s)
+    (if (null? s)
+        (error "using before declaring")
+        (rlookup-cps varname (caar s) (cadar s) (lambda (v) v) (lambda () (rlookup varname (cdr s)))))))
+  
+; rlookup-cps
+; A tail recursive helper for lookup
+(define rlookup-cps
+  (lambda (name namelis valuelis return break)
+    (cond
+      ((null? namelis) (break))
+      ((and (eq? name (car namelis)) (null_value? (car valuelis))) (error "using before assigning"))
+      ((eq? name (car namelis)) (return (car valuelis)))
+      (else (rlookup-cps name (cdr namelis) (cdr valuelis) return break)))))
 
 ; boolvalue
 ; Return the literal boolean value of a given value that is assumed to be either the truevalue or falsevalue atom
@@ -378,8 +388,8 @@
       (eq? op 'continue))))
 
 (define func-goto
-  (lambda (goto)
-    (goto-setup 'break gotoerror1 (goto-setup 'continue gotoerror1 goto))))
+  (lambda (s goto)
+    (goto-setup 'throw (lambda (lis) (goto 'throw (list (throw-value lis) s))) (goto-setup 'break gotoerror1 (goto-setup 'continue gotoerror1 goto)))))
 
 (define gotoreturn
   (lambda (return s)
@@ -504,3 +514,15 @@
     (add_layer null)))
 
 (define returnvalue (lambda (v) v))
+
+
+(define fparam-length
+  (lambda (lis)
+    (fparam-length-acc lis 0)))
+
+(define fparam-length-acc
+  (lambda (lis acc)
+    (cond
+      ((null? lis) acc)
+      ((eq? (car lis) '&) (fparam-length-acc (cdr lis) acc))
+      (else (fparam-length-acc (cdr lis) (+ 1 acc))))))
