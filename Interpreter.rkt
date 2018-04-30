@@ -18,7 +18,7 @@
 (define interpret
   (lambda (filename classname)
     ; The initial state is empty
-    (M_state_main classname (M_state_list (parser filename) (initstate) initgoto) initgoto)))
+    (M_state_list_init classname (parser filename) (initstate) initgoto)))
 
 ; M_state_assign
 ; Given a variable name, value, and a state, update the state so
@@ -64,14 +64,22 @@
         (M_state then-statement s goto)
         (M_state else-statement s goto))))
 
+; M_state_list_init
+; Top level interpreter code to store all classes in the state, then begin interpreting the class that was passed in as the main
+(define M_state_list_init
+  (lambda (class stmt-lis s goto)
+    (cond
+      ((null? stmt-lis) (M_state_list class (reconstruct class) s goto))
+      (else (M_state_list (next stmt-lis) (M_state (class-name (first stmt-lis)) (first stmt-lis) s goto) goto)))))
+
 ; M_state_list
 ; Given a list of statements and a state, evaluate each line with M_state and return the state
 ; after each line has been evaluated
 (define M_state_list
-  (lambda (stmt-lis s goto)
+  (lambda (class stmt-lis s goto)
     (cond
       ((null? stmt-lis) s)
-      (else (M_state_list (next stmt-lis) (M_state (first stmt-lis) s goto) goto)))))
+      (else (M_state_list class (next stmt-lis) (M_state class (first stmt-lis) s goto) goto)))))
 
 ; M_state_main
 ; Given an environment and a goto continuation,
@@ -83,7 +91,7 @@
 ; M_state
 ; Given a statement and a state, evaluate the statement and return the new state
 (define M_state
-  (lambda (stmt s goto)
+  (lambda (class stmt s goto)
     (cond
       ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
       ((not (exp? stmt)) s)
