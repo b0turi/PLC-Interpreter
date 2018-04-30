@@ -92,7 +92,7 @@
       ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto)))
       
       ; Check if the statement is a function declaration
-      ((eq? (operator stmt) 'function) (M_state_declare (var-name stmt) (fclosure (function-parameters stmt) (function-body stmt)) s))
+      ((eq? (operator stmt) 'function) (M_state_declare (function-name stmt) (fclosure (function-parameters stmt) (function-body stmt)) s))
 
       ; Check if the statement is a branching statement with a goto
       ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) (M_state_side-effect (assignment stmt) s goto) goto))))
@@ -109,6 +109,9 @@
       
       ; Check if a function is being called
       ((eq? (operator stmt) 'funcall) (M_state_function (function-name stmt) (function-arguments stmt) s goto))
+
+      ; Check if the statement is a class declaration
+      ((eq? (operator stmt) 'class) (M_state_declare (class-name stmt) (cclosure (class-parent stmt) (class-fields (class-body stmt)) (class-functions (class-body stmt)) (M_state_class_function_closures (class-body stmt) s)) s))
       
       (else (M_state_side-effect stmt s goto)))))
 
@@ -129,6 +132,14 @@
       ((single_value? stmt) (M_state_side-effect (operand1 stmt) s goto))
       ((dual_value? (operator stmt)) (M_state_side-effect (operand2 stmt) (M_state_side-effect (operand1 stmt) s goto) goto))
       (else s))))
+
+; M_state_class_function_closures
+(define M_state_class_function_closures
+  (lambda (body s goto)
+    (cond
+      ((null? body) s)
+      ((or (eq? (operator (first body)) 'function) (eq? (operator (first body)) 'static-function)) (M_state_class_function_closures (next body) (M_state (first body) s goto) goto))
+      (else (M_state_class_function_closures (next body) s goto)))))
 
 ; M_state_while-start
 ; A helper function for M_state_while using the current continuation to keep track of the state

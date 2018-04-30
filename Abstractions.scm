@@ -45,6 +45,63 @@
   (lambda (stmt)
     (cadr stmt)))
 
+; ===== Class "readers" =====
+
+; class-name
+(define class-name
+  (lambda (stmt)
+    (cadr stmt)))
+
+; class-extends
+(define class-extends
+  (lambda (stmt)
+    (caddr stmt)))
+
+; extends?
+(define extends?
+  (lambda (stmt)
+    (if (null (class-extends stmt))
+        'f
+        't)))
+
+; class-parent
+(define class-parent
+  (lambda (stmt)
+    (if (extends? stmt)
+        (cadr (class-extends stmt))
+        (nullvalue))))
+
+; class-body
+(define class-body
+  (lambda (stmt)
+    (cadddr stmt)))
+
+; class-fields
+(define class-fields
+  (lambda (body)
+    (class-fields-cps body (lambda (v) v))))
+
+; class-fields-cps
+(define class-fields-cps
+  (lambda (body return)
+    (cond
+      ((null? body) (return '()))
+      ((eq? (operator (car body)) 'var) (class-fields-cps (cdr body) (lambda (v) (return (cons (var-name (car body)) v)))))
+      (else (class-fields-cps (cdr body) return)))))
+
+; class-functions
+(define class-functions
+  (lambda (body)
+    (class-functions-cps body (lambda (v) v))))
+
+; class-functions-cps
+(define class-functions-cps
+  (lambda (body return)
+    (cond
+      ((null? body) (return '()))
+      ((or (eq? (operator (car body)) 'function) (eq? (operator (car body)) 'static-function)) (class-functions-cps (cdr body) (lambda (v) (return (cons (function-name (car body)) v)))))
+      (else class-functions-cps (cdr body) return))))
+
 ; operator
 ; Given a statement, retrieve the operator in the statement
 (define operator
@@ -151,6 +208,20 @@
 (define cclosure-fclosures
   (lambda (stmt)
     (cadddr stmt)))
+
+; Instance Closure
+(define iclosure
+  (lambda (class ifields)
+    (list class ifields)))
+
+(define iclosure-class
+  (lambda (stmt)
+    (car stmt)))
+
+(define iclosure-ifields
+  (lambda (stmt)
+    (cadr stmt)))
+
 
 ; ==== If and While Statement Helpers ====
 
@@ -336,6 +407,11 @@
       (else (exist-top?-cps name (cdr namelis) return)))))
 
 ; ===== Miscellaneous =====
+
+; first
+(define first
+  (lambda (lis)
+    (car lis)))
 
 ; next
 ; Given a list, return the list without its first element,
