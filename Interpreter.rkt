@@ -9,13 +9,13 @@
 ; Kyle Thompson
 ; ==========================================
 
-(require "functionParser.scm")
+(require "classParser.scm")
 (require "Abstractions.scm")
 
 ; interpret
 ; Given a filename of Java/C-like code, use simpleParser to parse the file and then get the value that block of code returns
 (define interpret
-  (lambda (filename)
+  (lambda (filename classname)
     ; The initial state is empty
     (M_state_main (M_state_list (parser filename) (initstate) initgoto) initgoto)))
 
