@@ -57,19 +57,12 @@
   (lambda (stmt)
     (caddr stmt)))
 
-; extends?
-(define extends?
-  (lambda (stmt)
-    (if (null (class-extends stmt))
-        'f
-        't)))
-
 ; class-parent
 (define class-parent
   (lambda (stmt)
-    (if (extends? stmt)
-        (cadr (class-extends stmt))
-        (nullvalue))))
+    (cond
+      ((null? (class-extends stmt)) (nullvalue))
+      (else (cadr (class-extends stmt))))))
 
 ; class-body
 (define class-body
@@ -85,7 +78,7 @@
 (define class-fields-cps
   (lambda (body return)
     (cond
-      ((null? body) (return '()))
+      ((null? body) (return '() '()))
       ((eq? (operator (car body)) 'var) (class-fields-cps (cdr body) (lambda (x y) (return (cons (var-name (car body)) x) (cons (assignment (car body)) y)))))
       (else (class-fields-cps (cdr body) return)))))
 
@@ -100,12 +93,10 @@
     (cond
       ((null? body) (return '()))
       ((or (eq? (operator (car body)) 'function) (eq? (operator (car body)) 'static-function)) (class-functions-cps (cdr body) (lambda (v) (return (cons (function-name (car body)) v)))))
-      (else class-functions-cps (cdr body) return))))
+      (else (class-functions-cps (cdr body) return)))))
 
 ; reconstruct
 ; After a class has been stored in its closure, combine the lists of fields and functions to be interpreted individually
-(define reconstruct
-  (lambda (
 
 ; operator
 ; Given a statement, retrieve the operator in the statement
@@ -196,7 +187,7 @@
 ;cclosure
 (define cclosure
   (lambda (parent ifields fnames fclosures)
-    (list parent ifields fnames fclosures)))
+    (cons parent (cons ifields (cons fnames (cons fclosures '()))))))
 
 (define cclosure-parent
   (lambda (stmt)
@@ -213,6 +204,12 @@
 (define cclosure-fclosures
   (lambda (stmt)
     (cadddr stmt)))
+
+(define get-class-closure
+  (lambda (name s)
+    (cond
+      ((null? s) (error "class not found"))
+      ((eq? (caar s) name) (cadr s)))))
 
 ; Instance Closure
 (define iclosure
@@ -385,12 +382,12 @@
   (lambda (class name s)
     (if (null? s)
         #f
-        (exist?-cps class name (class-lookup s) (lambda (v) v) (lambda () (exist? name (cdr s)))))))
+        (exist?-cps name (get-class-closure class s) (lambda (v) v) (lambda () (exist? name (cdr s)))))))
 
 ; exist?-cps
 ; A tail recursive helper for exist?
 (define exist?-cps
-  (lambda (class name namelis return break)
+  (lambda (name namelis return break)
     (cond
       ((null? namelis) (break))
       ((eq? name (car namelis)) (return #t))

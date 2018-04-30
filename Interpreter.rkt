@@ -41,7 +41,7 @@
   (lambda (class varname value s)
     (cond
       ((exist-top? varname s) (error "Redefining"))
-      (else (class insert-var varname value s)))))
+      (else (insert-var class varname value s)))))
 
 
 ; M_state_function
@@ -59,7 +59,7 @@
 ; Given a condition, its relevant then and else statements, and a state, return the 
 ; new state with the relevant statement evaluated, based on the condition
 (define M_state_if
-  (lambda (condition then-statement else-statement s goto)
+  (lambda (class condition then-statement else-statement s goto)
     (if (M_boolean class condition s goto)
         (M_state class then-statement s goto)
         (M_state class else-statement s goto))))
@@ -70,7 +70,7 @@
   (lambda (class stmt-lis s goto)
     (cond
       ((null? stmt-lis) (M_state_main class s goto))
-      (else (M_state_list (next stmt-lis) (M_state (class-name (first stmt-lis)) (first stmt-lis) s goto) goto)))))
+      (else (M_state_list_init class (next stmt-lis) (M_state (class-name (first stmt-lis)) (first stmt-lis) s goto) goto)))))
 
 ; M_state_list
 ; Given a list of statements and a state, evaluate each line with M_state and return the state
@@ -100,7 +100,7 @@
       ((eq? (operator stmt) 'var) (M_state_declare class (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto)))
       
       ; Check if the statement is a function declaration
-      ((eq? (operator stmt) 'function) (M_state_declare class (function-name stmt) (fclosure (function-parameters stmt) (function-body stmt)) s))
+      ((or (eq? (operator stmt) 'function) (eq? (operator stmt) 'static-function)) (M_state_declare class (function-name stmt) (fclosure (function-parameters stmt) (function-body stmt)) s))
 
       ; Check if the statement is a branching statement with a goto
       ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value class (return-exp stmt) (M_state_side-effect (assignment stmt) s goto) goto))))
@@ -119,7 +119,7 @@
       ((eq? (operator stmt) 'funcall) (M_state_function class (function-name stmt) (function-arguments stmt) s goto))
 
       ; Check if the statement is a class declaration
-      ((eq? (operator stmt) 'class) (M_state_declare (nullvalue) (class-name stmt) (cclosure (class-parent stmt) (class-fields (class-body stmt)) (class-functions (class-body stmt)) (M_state_class_function_closures (class-body stmt) s)) s))
+      ((eq? (operator stmt) 'class) (M_state_declare (nullvalue) (class-name stmt) (cclosure (nullvalue) (class-fields (class-body stmt)) (class-functions (class-body stmt)) (M_state_class_function_closures (class-name stmt) (class-body stmt) s goto)) s))
       
       (else (M_state_side-effect class stmt s goto)))))
 
@@ -146,7 +146,7 @@
   (lambda (class body s goto)
     (cond
       ((null? body) s)
-      ((or (eq? (operator (first body)) 'function) (eq? (operator (first body)) 'static-function)) (M_state_class_function_closures class (next body) (M_state (first body) s goto) goto))
+      ((or (eq? (operator (first body)) 'function) (eq? (operator (first body)) 'static-function)) (M_state_class_function_closures class (next body) (M_state class (first body) s goto) goto))
       (else (M_state_class_function_closures class (next body) s goto)))))
 
 ; M_state_while-start
@@ -236,7 +236,7 @@
     (call/cc
      (lambda (return)
        (cond
-         ((not (exist? class fname s)) (error "Function does not exist"))
+         ((not (exist? fname s)) (error "Function does not exist"))
          (else (M_state_list class (fclosure-body (lookup fname s)) (remove-layer fname (fsetup (fclosure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return return (func-goto s goto)))))))))
 
 ; M_evaluate
@@ -259,16 +259,16 @@
 ; Given a list of parameters, arguments, and a state, add each of the parameters into the state
 ; populated with the argument values, and return the new state
 (define fsetup
-  (lambda (params args s goto)
+  (lambda (class params args s goto)
     (cond
       ((> (fparam-length params) (length args)) (error "Too few arguments"))
       ((< (fparam-length params) (length args)) (error "Too many arguments"))
-      (else (fsetup-cps params args s goto (lambda (v) v))))))
+      (else (fsetup-cps class params args s goto (lambda (v) v))))))
 
 ; fsetup-cps
 ; A continuation passing style helper for fsetup
 (define fsetup-cps
-  (lambda (params args s goto return)
+  (lambda (class params args s goto return)
     (cond
       ((null? params) (return s))
       ((eq? '& (car params)) (fsetup-cps (cddr params) (cdr args) (M_state_side-effect class (car args) s goto) goto (lambda (v) (return (rinsert-var (cadr params) (rlookup (car args) s) v)))))
