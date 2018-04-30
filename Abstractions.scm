@@ -79,14 +79,14 @@
 ; class-fields
 (define class-fields
   (lambda (body)
-    (class-fields-cps body (lambda (v) v))))
+    (class-fields-cps body (lambda (x y) (list x y)))))
 
 ; class-fields-cps
 (define class-fields-cps
   (lambda (body return)
     (cond
       ((null? body) (return '()))
-      ((eq? (operator (car body)) 'var) (class-fields-cps (cdr body) (lambda (v) (return (cons (var-name (car body)) v)))))
+      ((eq? (operator (car body)) 'var) (class-fields-cps (cdr body) (lambda (x y) (return (cons (var-name (car body)) x) (cons (assignment (car body)) y)))))
       (else (class-fields-cps (cdr body) return)))))
 
 ; class-functions
@@ -101,6 +101,11 @@
       ((null? body) (return '()))
       ((or (eq? (operator (car body)) 'function) (eq? (operator (car body)) 'static-function)) (class-functions-cps (cdr body) (lambda (v) (return (cons (function-name (car body)) v)))))
       (else class-functions-cps (cdr body) return))))
+
+; reconstruct
+; After a class has been stored in its closure, combine the lists of fields and functions to be interpreted individually
+(define reconstruct
+  (lambda (
 
 ; operator
 ; Given a statement, retrieve the operator in the statement
@@ -267,14 +272,14 @@
 ; Given a variable name, value, and a state, insert the variable with the given value into the state,
 ; accounting for boolean literals, and return the new state with the variable added
 (define insert-var
-  (lambda (varname value s)
+  (lambda (class varname value s)
     (cons (list (cons varname (caar s)) (cons (box value) (cadar s))) (cdr s))))
 
 ; rinsert-var
 ; Given a variable name, value, and a state, insert the variable with the given value into the state,
 ; accounting for boolean literals, and return the new state with the variable added
 (define rinsert-var
-  (lambda (varname box s)
+  (lambda (class varname box s)
     (cons (list (cons varname (caar s)) (cons box (cadar s))) (cdr s))))
 
 ; replace-value
@@ -377,15 +382,15 @@
 ; exist?
 ; Given a name and a state, check if the given name is defined anywhere in any of the layers of the state
 (define exist?
-  (lambda (name s)
+  (lambda (class name s)
     (if (null? s)
         #f
-        (exist?-cps name (caar s) (lambda (v) v) (lambda () (exist? name (cdr s)))))))
+        (exist?-cps class name (class-lookup s) (lambda (v) v) (lambda () (exist? name (cdr s)))))))
 
 ; exist?-cps
 ; A tail recursive helper for exist?
 (define exist?-cps
-  (lambda (name namelis return break)
+  (lambda (class name namelis return break)
     (cond
       ((null? namelis) (break))
       ((eq? name (car namelis)) (return #t))

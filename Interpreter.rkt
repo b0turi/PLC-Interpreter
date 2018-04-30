@@ -1,6 +1,6 @@
 
 ; ==========================================
-; Interpreter, Part 3
+; Interpreter, Part 4
 ; EECS 345 - Programming Language Concepts
 ;
 ; Group 23
@@ -24,52 +24,52 @@
 ; Given a variable name, value, and a state, update the state so
 ; that the value of the variable of the given name is the given value
 (define M_state_assign
-  (lambda (varname value s goto)
+  (lambda (class varname value s goto)
     (replace-value varname value s)))
 
 ; M_state_block
 ; Given a list of statements contained within curly braces {} in the original code, iterate through the block, executing each line,
 ; and storing a goto value to keep track of where the line of execution should go after the block is completed
 (define M_state_block
-  (lambda (stmt-lis s goto)
+  (lambda (class stmt-lis s goto)
     ; Each block of code exists within its own layer on top of the state, which must be removed after the block is completed
-    (remove_layer (M_state_list stmt-lis (add_layer s) (block_goto goto)))))
+    (remove_layer (M_state_list class stmt-lis (add_layer s) (block_goto goto)))))
 
 ; M_state_declare
 ; takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
 (define M_state_declare
-  (lambda (varname value s)
+  (lambda (class varname value s)
     (cond
       ((exist-top? varname s) (error "Redefining"))
-      (else (insert-var varname value s)))))
+      (else (class insert-var varname value s)))))
 
 
 ; M_state_function
 ; Given a function name, a list of argument values, a state, and a goto continuation,
 ; return the function environment after the function has been executed
 (define M_state_function
-  (lambda (fname args s goto)
+  (lambda (class fname args s goto)
     (call/cc
      (lambda (return)
        (cond
          ((not (exist? fname s)) (error "Function does not exist"))
-         (else (begin (M_state_list (fclosure-body (lookup fname s)) (remove-layer fname (fsetup (fclosure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return (gotoreturn return s) (func-goto s goto))) s)))))))
+         (else (begin (M_state_list class (fclosure-body (lookup fname s)) (remove-layer fname (fsetup (fclosure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return (gotoreturn return s) (func-goto s goto))) s)))))))
 
 ; M_state_if
 ; Given a condition, its relevant then and else statements, and a state, return the 
 ; new state with the relevant statement evaluated, based on the condition
 (define M_state_if
   (lambda (condition then-statement else-statement s goto)
-    (if (M_boolean condition s goto)
-        (M_state then-statement s goto)
-        (M_state else-statement s goto))))
+    (if (M_boolean class condition s goto)
+        (M_state class then-statement s goto)
+        (M_state class else-statement s goto))))
 
 ; M_state_list_init
 ; Top level interpreter code to store all classes in the state, then begin interpreting the class that was passed in as the main
 (define M_state_list_init
   (lambda (class stmt-lis s goto)
     (cond
-      ((null? stmt-lis) (M_state_list class (reconstruct class) s goto))
+      ((null? stmt-lis) (M_state_main class s goto))
       (else (M_state_list (next stmt-lis) (M_state (class-name (first stmt-lis)) (first stmt-lis) s goto) goto)))))
 
 ; M_state_list
@@ -97,122 +97,122 @@
       ((not (exp? stmt)) s)
       
       ; Check if the statement creates a new variable
-      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto)))
+      ((eq? (operator stmt) 'var) (M_state_declare class (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto)))
       
       ; Check if the statement is a function declaration
-      ((eq? (operator stmt) 'function) (M_state_declare (function-name stmt) (fclosure (function-parameters stmt) (function-body stmt)) s))
+      ((eq? (operator stmt) 'function) (M_state_declare class (function-name stmt) (fclosure (function-parameters stmt) (function-body stmt)) s))
 
       ; Check if the statement is a branching statement with a goto
-      ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) (M_state_side-effect (assignment stmt) s goto) goto))))
-      ((eq? (operator stmt) 'throw) (goto 'throw (throws (realvalue (M_value (return-exp stmt) s goto)) s)))
+      ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value class (return-exp stmt) (M_state_side-effect (assignment stmt) s goto) goto))))
+      ((eq? (operator stmt) 'throw) (goto 'throw (throws (realvalue (M_value class (return-exp stmt) s goto)) s)))
       ((state-goto? (operator stmt)) (goto (operator stmt) s))
-      ((eq? (operator stmt) 'try) (M_state_try stmt s goto))
+      ((eq? (operator stmt) 'try) (M_state_try class stmt s goto))
       
       ; Check if the statement is a branching statement with a condition
-      ((eq? (operator stmt) 'while) (M_state_while-start (condition stmt) (body stmt) s goto))
-      ((eq? (operator stmt) 'if) (M_state_if (condition stmt) (then stmt) (else stmt) s goto))
+      ((eq? (operator stmt) 'while) (M_state_while-start class (condition stmt) (body stmt) s goto))
+      ((eq? (operator stmt) 'if) (M_state_if class (condition stmt) (then stmt) (else stmt) s goto))
 
       ; Check if the statement is a block of code, defined by "begin" in the parser
-      ((eq? (operator stmt) 'begin) (M_state_block (block-body stmt) s goto))
+      ((eq? (operator stmt) 'begin) (M_state_block class (block-body stmt) s goto))
       
       ; Check if a function is being called
-      ((eq? (operator stmt) 'funcall) (M_state_function (function-name stmt) (function-arguments stmt) s goto))
+      ((eq? (operator stmt) 'funcall) (M_state_function class (function-name stmt) (function-arguments stmt) s goto))
 
       ; Check if the statement is a class declaration
-      ((eq? (operator stmt) 'class) (M_state_declare (class-name stmt) (cclosure (class-parent stmt) (class-fields (class-body stmt)) (class-functions (class-body stmt)) (M_state_class_function_closures (class-body stmt) s)) s))
+      ((eq? (operator stmt) 'class) (M_state_declare (nullvalue) (class-name stmt) (cclosure (class-parent stmt) (class-fields (class-body stmt)) (class-functions (class-body stmt)) (M_state_class_function_closures (class-body stmt) s)) s))
       
-      (else (M_state_side-effect stmt s goto)))))
+      (else (M_state_side-effect class stmt s goto)))))
 
 ; M_state_side_effect
 ; Given a statement, a state, and a goto continuation,
 ; Evaluate the statement but also account for any side effects that may occur by recursively iterating
 ; until all operators and expressions have been evaluated
 (define M_state_side-effect
-  (lambda (stmt s goto)
+  (lambda (class stmt s goto)
     (cond
       ; Ensure that the statement is an expression that can be evaluated, ie returns the same state is the input is not an expression
       ((not (exp? stmt)) s)
       
       ; Check if the statement reassigns a value 
-      ((eq? (operator stmt) '=) (M_state_assign (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto) goto))
+      ((eq? (operator stmt) '=) (M_state_assign class (var-name stmt) (M_value class (assignment stmt) s goto) (M_state_side-effect class (assignment stmt) s goto) goto))
   
       ; Check if the statement is another kind of expression
-      ((single_value? stmt) (M_state_side-effect (operand1 stmt) s goto))
-      ((dual_value? (operator stmt)) (M_state_side-effect (operand2 stmt) (M_state_side-effect (operand1 stmt) s goto) goto))
+      ((single_value? stmt) (M_state_side-effect class (operand1 stmt) s goto))
+      ((dual_value? (operator stmt)) (M_state_side-effect class (operand2 stmt) (M_state_side-effect class (operand1 stmt) s goto) goto))
       (else s))))
 
 ; M_state_class_function_closures
 (define M_state_class_function_closures
-  (lambda (body s goto)
+  (lambda (class body s goto)
     (cond
       ((null? body) s)
-      ((or (eq? (operator (first body)) 'function) (eq? (operator (first body)) 'static-function)) (M_state_class_function_closures (next body) (M_state (first body) s goto) goto))
-      (else (M_state_class_function_closures (next body) s goto)))))
+      ((or (eq? (operator (first body)) 'function) (eq? (operator (first body)) 'static-function)) (M_state_class_function_closures class (next body) (M_state (first body) s goto) goto))
+      (else (M_state_class_function_closures class (next body) s goto)))))
 
 ; M_state_while-start
 ; A helper function for M_state_while using the current continuation to keep track of the state
 (define M_state_while-start
-  (lambda (condition body-statement s goto)
+  (lambda (class condition body-statement s goto)
     (call/cc
      (lambda (break)
-       (M_state_while condition body-statement s (goto-setup 'break break goto))))))
+       (M_state_while class condition body-statement s (goto-setup 'break break goto))))))
 
 ; M_state_while
 ; Given a condition, body, and state, recursively update the state until the condition is met
 (define M_state_while
-  (lambda (condition body-statement s goto)
-    (if (M_boolean condition s goto)
-        (M_state_while condition body-statement (M_state-continue body-statement s goto) goto)
+  (lambda (class condition body-statement s goto)
+    (if (M_boolean class condition s goto)
+        (M_state_while class condition body-statement (M_state-continue class body-statement s goto) goto)
         s)))
 
 ; M_state_continue
 ; Given a statement, state, and a point to jump to within a given loop of iteration, return to the top of the loop
 (define M_state-continue
-  (lambda (stmt s goto)
+  (lambda (class stmt s goto)
     (call/cc
      (lambda (continue)
-       (M_state stmt s (goto-setup 'continue continue goto))))))
+       (M_state class stmt s (goto-setup 'continue continue goto))))))
 
 ; M_state_try
 ; Given a block of code that contains a portion of a try/catch block, a state, and a point to go to,
 ; go to the correct portion of the code based on the portion of the try/catch block
 (define M_state_try
-  (lambda (stmt s goto)
+  (lambda (class stmt s goto)
     (cond
-      ((and (catch? stmt) (finally? stmt)) (M_state_block (finally-body stmt) (M_state_try_with-catch stmt s goto) goto))
-      ((catch? stmt) (M_state_try_with-catch stmt s goto))
-      ((finally? stmt) (M_state_block (finally-body stmt) (M_state_try_without-catch (try-body stmt) s goto) goto))
-      (else (M_state_try_without-catch (try-body stmt) s goto)))))
+      ((and (catch? stmt) (finally? stmt)) (M_state_block class (finally-body stmt) (M_state_try_with-catch class stmt s goto) goto))
+      ((catch? stmt) (M_state_try_with-catch class stmt s goto))
+      ((finally? stmt) (M_state_block class (finally-body stmt) (M_state_try_without-catch class (try-body stmt) s goto) goto))
+      (else (M_state_try_without-catch class (try-body stmt) s goto)))))
 
 ; M_state_try_without-catch
 ; Given a statement, state, and branching point, attempt to execute the statement as a block of code and if an error occurs, jump to the goto point
 (define M_state_try_without-catch
-  (lambda (stmt s goto)
+  (lambda (class stmt s goto)
     (call/cc
      (lambda (throw)
-       (M_state_block stmt s (goto-setup 'throw (lambda (t) (throw (throw-state t))) goto))))))
+       (M_state_block class stmt s (goto-setup 'throw (lambda (t) (throw (throw-state t))) goto))))))
 
 ; M_state_try_with-catch
 ; Given a statement, state, and branching point, attempt to execute the statement as a block of code but if an error occurs, jump to the associated catch statement
 (define M_state_try_with-catch
-  (lambda (stmt s goto)
+  (lambda (class stmt s goto)
     (call/cc
      (lambda (throw)
-       (M_state_block (try-body stmt) s (goto-setup 'throw (lambda (t) (throw (M_state_catch stmt (throw-value t) (remove_layer (throw-state t)) goto))) goto))))))
+       (M_state_block class (try-body stmt) s (goto-setup 'throw (lambda (t) (throw (M_state_catch stmt class (throw-value t) (remove_layer (throw-state t)) goto))) goto))))))
 
 ; M_state_catch
 ; Execute a block of code that is associated with a try block and handle any errors that occurred during execution of the try block
 (define M_state_catch
-  (lambda (stmt e s goto)
-    (M_state_block (catch-body stmt) (M_state_declare (catch-var stmt) e s) goto)))
+  (lambda (class stmt e s goto)
+    (M_state_block class (catch-body stmt) (M_state_declare class (catch-var stmt) e s) goto)))
 
 
 ; M_boolean
 ; Given a boolean statement and a state, return the boolean value of the statement
 (define M_boolean
-  (lambda (b-stmt s goto)
+  (lambda (class b-stmt s goto)
     (cond
-      ((exp? b-stmt) (M_evaluate b-stmt s goto))
+      ((exp? b-stmt) (M_evaluate class b-stmt s goto))
       ((boolean? b-stmt) b-stmt)
       ((boolvalue? b-stmt) (boolvalue b-stmt))
       (else (lookup b-stmt s)))))
@@ -220,9 +220,9 @@
 ; M_value
 ; Given a statement and a state, retrieve the value returned by the statement
 (define M_value
-  (lambda (stmt s goto)
+  (lambda (class stmt s goto)
     (cond
-      ((exp? stmt) (M_evaluate stmt s goto))
+      ((exp? stmt) (M_evaluate class stmt s goto))
       ((null_value? stmt) (nullvalue))
       ((or (boolean? stmt) (number? stmt)) stmt)
       ((boolvalue? stmt) (boolvalue stmt))
@@ -236,22 +236,22 @@
     (call/cc
      (lambda (return)
        (cond
-         ((not (exist? fname s)) (error "Function does not exist"))
-         (else (M_state_list (fclosure-body (lookup fname s)) (remove-layer fname (fsetup (fclosure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return return (func-goto s goto)))))))))
+         ((not (exist? class fname s)) (error "Function does not exist"))
+         (else (M_state_list class (fclosure-body (lookup fname s)) (remove-layer fname (fsetup (fclosure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return return (func-goto s goto)))))))))
 
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state
 (define M_evaluate
-  (lambda (exp s goto)
+  (lambda (class exp s goto)
     (cond
       ; Check if a function is being called
-      ((eq? (operator exp) 'funcall) (M_value_function (function-name exp) (function-arguments exp) s goto))
+      ((eq? (operator exp) 'funcall) (M_value_function class (function-name exp) (function-arguments exp) s goto))
       
-      ((unary-? exp) (- 0 (M_value (operand1 exp) s goto)))
-      ((eq? (operator exp) '!) (not (M_boolean (operand1 exp) s goto)))
-      ((eq? (operator exp) '=) (M_value (assignment exp) (M_state_side-effect (assignment exp) s goto) goto))
-      ((value_op? (operator exp)) (operation (operator exp) (M_value (operand1 exp) s goto) (M_value (operand2 exp) (M_state_side-effect (operand1 exp) s goto) goto)))
-      ((bool_op? (operator exp)) (operation (operator exp) (M_boolean (operand1 exp) s goto) (M_boolean (operand2 exp) (M_state_side-effect (operand1 exp) s goto) goto)))
+      ((unary-? exp) (- 0 (M_value class (operand1 exp) s goto)))
+      ((eq? (operator exp) '!) (not (M_boolean class (operand1 exp) s goto)))
+      ((eq? (operator exp) '=) (M_value class (assignment exp) (M_state_side-effect class (assignment exp) s goto) goto))
+      ((value_op? (operator exp)) (operation (operator exp) (M_value class (operand1 exp) s goto) (M_value class (operand2 exp) (M_state_side-effect class (operand1 exp) s goto) goto)))
+      ((bool_op? (operator exp)) (operation (operator exp) (M_boolean class (operand1 exp) s goto) (M_boolean class (operand2 exp) (M_state_side-effect class (operand1 exp) s goto) goto)))
       
       (else (error "Expression id not valid")))))
 
@@ -271,5 +271,5 @@
   (lambda (params args s goto return)
     (cond
       ((null? params) (return s))
-      ((eq? '& (car params)) (fsetup-cps (cddr params) (cdr args) (M_state_side-effect (car args) s goto) goto (lambda (v) (return (rinsert-var (cadr params) (rlookup (car args) s) v)))))
-      (else (fsetup-cps (cdr params) (cdr args) (M_state_side-effect (car args) s goto) goto (lambda (v) (return (insert-var (car params) (M_value (car args) s goto) v))))))))
+      ((eq? '& (car params)) (fsetup-cps (cddr params) (cdr args) (M_state_side-effect class (car args) s goto) goto (lambda (v) (return (rinsert-var (cadr params) (rlookup (car args) s) v)))))
+      (else (fsetup-cps (cdr params) (cdr args) (M_state_side-effect class (car args) s goto) goto (lambda (v) (return (insert-var (car params) (M_value class (car args) s goto) v))))))))
