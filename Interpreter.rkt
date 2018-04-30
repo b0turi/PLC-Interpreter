@@ -13,11 +13,12 @@
 (require "Abstractions.scm")
 
 ; interpret
-; Given a filename of Java/C-like code, use simpleParser to parse the file and then get the value that block of code returns
+; Given a filename of Java/C-like code and a target class, use simpleParser to parse the file and then get the value that block of code returns
+; when using the "main" method of the given class
 (define interpret
   (lambda (filename classname)
     ; The initial state is empty
-    (M_state_main (M_state_list (parser filename) (initstate) initgoto) initgoto)))
+    (M_state_main classname (M_state_list (parser filename) (initstate) initgoto) initgoto)))
 
 ; M_state_assign
 ; Given a variable name, value, and a state, update the state so
@@ -42,6 +43,7 @@
       ((exist-top? varname s) (error "Redefining"))
       (else (insert-var varname value s)))))
 
+
 ; M_state_function
 ; Given a function name, a list of argument values, a state, and a goto continuation,
 ; return the function environment after the function has been executed
@@ -51,7 +53,7 @@
      (lambda (return)
        (cond
          ((not (exist? fname s)) (error "Function does not exist"))
-         (else (begin (M_state_list (closure-body (lookup fname s)) (remove-layer fname (fsetup (closure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return (gotoreturn return s) (func-goto s goto))) s)))))))
+         (else (begin (M_state_list (fclosure-body (lookup fname s)) (remove-layer fname (fsetup (fclosure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return (gotoreturn return s) (func-goto s goto))) s)))))))
 
 ; M_state_if
 ; Given a condition, its relevant then and else statements, and a state, return the 
@@ -75,8 +77,8 @@
 ; Given an environment and a goto continuation,
 ; search for the main function and call it using M_value_function, passing the goto continuation as well
 (define M_state_main
-  (lambda (s goto)
-    (M_value_function 'main '() s goto)))
+  (lambda (class s goto)
+    (M_value_function class 'main '() s goto)))
     
 ; M_state
 ; Given a statement and a state, evaluate the statement and return the new state
@@ -90,7 +92,7 @@
       ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto)))
       
       ; Check if the statement is a function declaration
-      ((eq? (operator stmt) 'function) (M_state_declare (var-name stmt) (closure (function-parameters stmt) (function-body stmt)) s))
+      ((eq? (operator stmt) 'function) (M_state_declare (var-name stmt) (fclosure (function-parameters stmt) (function-body stmt)) s))
 
       ; Check if the statement is a branching statement with a goto
       ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value (return-exp stmt) (M_state_side-effect (assignment stmt) s goto) goto))))
@@ -208,15 +210,15 @@
       (else (lookup stmt s)))))
 
 ; M_value_function
-; Given a function name, a list of argument values, a state, and a goto continuation,
-; call the given function using the closure provided in the environment and return the state
+; Given a containing class, function name, a list of argument values, a state, and a goto continuation,
+; call the given function using the function closure provided in the environment and return the state
 (define M_value_function
-  (lambda (fname args s goto)
+  (lambda (class fname args s goto)
     (call/cc
      (lambda (return)
        (cond
          ((not (exist? fname s)) (error "Function does not exist"))
-         (else (M_state_list (closure-body (lookup fname s)) (remove-layer fname (fsetup (closure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return return (func-goto s goto)))))))))
+         (else (M_state_list (fclosure-body (lookup fname s)) (remove-layer fname (fsetup (fclosure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return return (func-goto s goto)))))))))
 
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state

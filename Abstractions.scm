@@ -108,24 +108,49 @@
   (lambda (stmt)
     (cadr (cadddr stmt))))
 
-; closure
+; Function closures
+
+; fclosure
 ; Given a list of parameters and the body of a function, return the two listed together
 ; To be used as the basis for a closure function
-(define closure
+(define fclosure
   (lambda (params body)
     (list params body)))
 
-; closure-body
-; Given a statement that is assumed to be a closure (as created by the helper function "closure"), retrieve the body of the function
-(define closure-body
+; fclosure-body
+; Given a statement that is assumed to be a closure (as created by the helper function "fclosure"), retrieve the body of the function
+(define fclosure-body
   (lambda (stmt)
     (cadr stmt)))
 
-; closure-params
-; Given a statement that is assumed to be a closure (as created by the helper function "closure"), retrieve the parameters of the function
-(define closure-params
+; fclosure-params
+; Given a statement that is assumed to be a closure (as created by the helper function "fclosure"), retrieve the parameters of the function
+(define fclosure-params
   (lambda (stmt)
     (car stmt)))
+
+; Class Closure
+
+;cclosure
+(define cclosure
+  (lambda (parent ifields fnames fclosures)
+    (list parent ifields fnames fclosures)))
+
+(define cclosure-parent
+  (lambda (stmt)
+    (car stmt)))
+
+(define cclosure-ifields
+  (lambda (stmt)
+    (cadr stmt)))
+
+(define cclosure-fnames
+  (lambda (stmt)
+    (caddr stmt)))
+
+(define cclosure-fclosures
+  (lambda (stmt)
+    (cadddr stmt)))
 
 ; ==== If and While Statement Helpers ====
 
