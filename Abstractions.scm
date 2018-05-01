@@ -89,7 +89,6 @@
   (lambda (stmt)
     (car stmt)))
 
-
 ; ===== Closure =====
 
 
@@ -340,10 +339,6 @@
 (define dual_value?
   (lambda (op)
     (or (value_op? op) (bool_op? op))))
-
-(define next
-  (lambda (stmt)
-    (cdr stmt)))
 
 ; value_op?
 ; Given an operator, return a boolean value as to whether the operator is a value operator,

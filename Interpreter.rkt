@@ -13,6 +13,7 @@
 #lang racket
 (provide (all-defined-out))
 (require "Abstractions.scm")
+(require "Readers.scm")
 
 
 ; M_state_assign
@@ -105,9 +106,6 @@
       ; Check if a function is being called
       ((eq? (operator stmt) 'funcall) (M_state_function class (function-name stmt) (function-arguments stmt) s goto api instance))
 
-      ; Check if the statement is a class declaration
-      ((eq? (operator stmt) 'class) (M_state_declare (nullvalue) (class-name stmt) (cclosure (nullvalue) (class-fields (class-body stmt)) (class-functions (class-body stmt)) (M_state_class_function_closures (class-name stmt) (class-body stmt) s goto api instance)) s))
-      
       (else (M_state_side-effect class stmt s goto api instance)))))
 
 ; M_state_side_effect
@@ -229,7 +227,7 @@
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state
 (define M_evaluate
-  (lambda (class exp s goto)
+  (lambda (class exp s goto api instance)
     (cond
       ; Check if a function is being called
       ((eq? (operator exp) 'funcall) (M_value_function class (function-name exp) (function-arguments exp) s goto api instance))
