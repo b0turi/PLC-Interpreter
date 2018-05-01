@@ -403,6 +403,21 @@
   (lambda (op)
     (or (eq? '&& op) (eq? '|| op))))
 
+(define isetup
+  (lambda (class api)
+    (isetup-cps class (vlookup class (name-lis api) (class-parent-lis api)) api (blank-state) (lambda (v) v))))
+
+(define isetup-cps
+  (lambda (class parent api state return)
+    (cond
+      ((eq? 'null parent) (return (bind-lis state)))
+      ((isetup-cps-cps (vlookup class (name-lis api) (fieldlis-lis api)) state (lambda (v) v))))))
+
+(define isetup-cps-cps
+  (lambda (fieldlis state return)
+    (cond
+      ((null? fieldlis) (return state))
+      (else (isetup-cps-cps (cdr fieldlis) (insert-method (car fieldlis) (nullvalue) state) return)))))
 ; operation
 ; Given an operator and two operands, return the result of the operation on the two operands
 (define operation
