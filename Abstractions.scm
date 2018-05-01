@@ -75,7 +75,7 @@
 ; To be used as the basis for a closure function
 (define fclosure
   (lambda (params body)
-    (list (cons 'this params) body)))
+    (list params body)))
 
 ; fclosure-body
 ; Given a statement that is assumed to be a closure (as created by the helper function "fclosure"), retrieve the body of the function
@@ -193,15 +193,11 @@
 ; lookup
 ; Given a variable name and a state, check if that variable is defined in that state.
 ; Throws and appropriate error if the variable doesn't exist in the state or is uninitialized
-(define lookup-helper
+(define lookup
   (lambda (varname s)
     (if (null? s)
         (error "using before declaring")
-        (vlookups (unbox (vlookup varname (caar s) (reverse (cadar s)))) (lambda () (error "using before assigning")) (lambda () (lookup-helper varname (cdr s)))))))
-
-(define lookup
-  (lambda (class api varname s)
-    (lookup-helper (varname (csetup class s api)))))
+        (vlookups (unbox (vlookup varname (caar s) (reverse (cadar s)))) (lambda () (error "using before assigning")) (lambda () (lookup varname (cdr s)))))))
 
 (define lookup-class
   (lambda (classname s)
@@ -435,7 +431,7 @@
 
 (define fparam-length
   (lambda (lis)
-    (- (fparam-length-acc lis 0) 2)))
+    (fparam-length-acc lis 0)))
 
 (define fparam-length-acc
   (lambda (lis acc)
