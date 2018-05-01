@@ -98,7 +98,9 @@
 
 (define cclosure-parent
   (lambda (stmt)
-    (car stmt)))
+    (cond
+      ((null? (car stmt)) '())
+      (else (cadr (car stmt))))))
 
 (define cclosure-ifields
   (lambda (stmt)
