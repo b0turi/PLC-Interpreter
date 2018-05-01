@@ -1,9 +1,9 @@
 
 ; ==========================================
-; Abstractions, Part 2
+; Abstractions, Part 3
 ; EECS 345 - Programming Language Concepts
 ;
-; Group 8
+; Group 23
 ; Jaafar Bennani
 ; Alex Hemm
 ; Kyle Thompson
@@ -14,12 +14,89 @@
 
 ; ===== Function "readers" =====
 
+; function-arguments
+; Given a statement that is assumed to be a function call, retrieve the list of arguments to call the function with
+(define function-arguments
+  (lambda (stmt)
+    (cddr stmt)))
+
+; function-body
+; Given a statement that is assumed to be a function declaration, retrieve the body of the function
+(define function-body
+  (lambda (stmt)
+    (cadddr stmt)))
+
+; function-name
+; Given a statement that is assumed to be a function declaration, retrieve the name of the function
+(define function-name
+  (lambda (stmt)
+    (cadr stmt)))
+
+; function-parameters
+; Given a statement that is assumed to be a function declaration, retrieve the list of parameters for the function
+(define function-parameters
+  (lambda (stmt)
+    (caddr stmt)))
+
 ; return-exp
 ; Given a statement that is known to be a return statement,
 ; return the value the statement dictates is to be returned
 (define return-exp
   (lambda (stmt)
     (cadr stmt)))
+
+; ===== Class "readers" =====
+
+; class-name
+(define class-name
+  (lambda (stmt)
+    (cadr stmt)))
+
+; class-extends
+(define class-extends
+  (lambda (stmt)
+    (caddr stmt)))
+
+; class-parent
+(define class-parent
+  (lambda (stmt)
+    (cond
+      ((null? (class-extends stmt)) (nullvalue))
+      (else (cadr (class-extends stmt))))))
+
+; class-body
+(define class-body
+  (lambda (stmt)
+    (cadddr stmt)))
+
+; class-fields
+(define class-fields
+  (lambda (body)
+    (class-fields-cps body (lambda (x y) (list x y)))))
+
+; class-fields-cps
+(define class-fields-cps
+  (lambda (body return)
+    (cond
+      ((null? body) (return '() '()))
+      ((eq? (operator (car body)) 'var) (class-fields-cps (cdr body) (lambda (x y) (return (cons (var-name (car body)) x) (cons (assignment (car body)) y)))))
+      (else (class-fields-cps (cdr body) return)))))
+
+; class-functions
+(define class-functions
+  (lambda (body)
+    (class-functions-cps body (lambda (v) v))))
+
+; class-functions-cps
+(define class-functions-cps
+  (lambda (body return)
+    (cond
+      ((null? body) (return '()))
+      ((or (eq? (operator (car body)) 'function) (eq? (operator (car body)) 'static-function)) (class-functions-cps (cdr body) (lambda (v) (return (cons (function-name (car body)) v)))))
+      (else (class-functions-cps (cdr body) return)))))
+
+; reconstruct
+; After a class has been stored in its closure, combine the lists of fields and functions to be interpreted individually
 
 ; operator
 ; Given a statement, retrieve the operator in the statement
@@ -84,6 +161,70 @@
   (lambda (stmt)
     (cadr (cadddr stmt))))
 
+; Function closures
+
+; fclosure
+; Given a list of parameters and the body of a function, return the two listed together
+; To be used as the basis for a closure function
+(define fclosure
+  (lambda (params body)
+    (list params body)))
+
+; fclosure-body
+; Given a statement that is assumed to be a closure (as created by the helper function "fclosure"), retrieve the body of the function
+(define fclosure-body
+  (lambda (stmt)
+    (cadr stmt)))
+
+; fclosure-params
+; Given a statement that is assumed to be a closure (as created by the helper function "fclosure"), retrieve the parameters of the function
+(define fclosure-params
+  (lambda (stmt)
+    (car stmt)))
+
+; Class Closure
+
+;cclosure
+(define cclosure
+  (lambda (parent ifields fnames fclosures)
+    (cons parent (cons ifields (cons fnames (cons fclosures '()))))))
+
+(define cclosure-parent
+  (lambda (stmt)
+    (car stmt)))
+
+(define cclosure-ifields
+  (lambda (stmt)
+    (cadr stmt)))
+
+(define cclosure-fnames
+  (lambda (stmt)
+    (caddr stmt)))
+
+(define cclosure-fclosures
+  (lambda (stmt)
+    (cadddr stmt)))
+
+(define get-class-closure
+  (lambda (name s)
+    (cond
+      ((null? s) (error "class not found"))
+      ((eq? (caar s) name) (cadr s)))))
+
+; Instance Closure
+(define iclosure
+  (lambda (class ifields)
+    (list class ifields)))
+
+(define iclosure-class
+  (lambda (stmt)
+    (car stmt)))
+
+(define iclosure-ifields
+  (lambda (stmt)
+    (cadr stmt)))
+
+
 ; ==== If and While Statement Helpers ====
 
 ; condition
@@ -117,6 +258,7 @@
     (caddr stmt)))
 
 ; block-body
+; Given a statment that is known to be a block of code, retrieve the body of the block
 (define block-body
   (lambda (stmt)
     (cdr stmt)))
@@ -127,8 +269,15 @@
 ; Given a variable name, value, and a state, insert the variable with the given value into the state,
 ; accounting for boolean literals, and return the new state with the variable added
 (define insert-var
-  (lambda (varname value s)
+  (lambda (class varname value s)
     (cons (list (cons varname (caar s)) (cons (box value) (cadar s))) (cdr s))))
+
+; rinsert-var
+; Given a variable name, value, and a state, insert the variable with the given value into the state,
+; accounting for boolean literals, and return the new state with the variable added
+(define rinsert-var
+  (lambda (class varname box s)
+    (cons (list (cons varname (caar s)) (cons box (cadar s))) (cdr s))))
 
 ; replace-value
 ; Given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state
@@ -160,6 +309,18 @@
         (error "No layers present")
         (cdr s))))
 
+; remove_layer
+; An alternate version of remove_layer that removes a specific state for a function
+(define remove-layer
+  (lambda (fname s)
+    (cons (car s) (remove-layer-helper fname (cdr s)))))
+
+(define remove-layer-helper
+  (lambda (fname s)
+    (cond
+      ((exist-top? fname s) s)
+      (else (remove-layer-helper fname (cdr s))))))
+
 ; ===== Lookup =====
 ; lookup
 ; Given a variable name and a state, check if that variable is defined in that state.
@@ -180,6 +341,25 @@
       ((eq? name (car namelis)) (return (unbox (car valuelis))))
       (else (lookup-cps name (cdr namelis) (cdr valuelis) return break)))))
 
+; rlookup
+; Given a variable name and a state, check if that variable is defined in that state.
+; Throws and appropriate error if the variable doesn't exist in the state or is uninitialized
+(define rlookup
+  (lambda (varname s)
+    (if (null? s)
+        (error "using before declaring")
+        (rlookup-cps varname (caar s) (cadar s) (lambda (v) v) (lambda () (rlookup varname (cdr s)))))))
+  
+; rlookup-cps
+; A tail recursive helper for lookup
+(define rlookup-cps
+  (lambda (name namelis valuelis return break)
+    (cond
+      ((null? namelis) (break))
+      ((and (eq? name (car namelis)) (null_value? (car valuelis))) (error "using before assigning"))
+      ((eq? name (car namelis)) (return (car valuelis)))
+      (else (rlookup-cps name (cdr namelis) (cdr valuelis) return break)))))
+
 ; boolvalue
 ; Return the literal boolean value of a given value that is assumed to be either the truevalue or falsevalue atom
 (define boolvalue
@@ -199,10 +379,10 @@
 ; exist?
 ; Given a name and a state, check if the given name is defined anywhere in any of the layers of the state
 (define exist?
-  (lambda (name s)
+  (lambda (class name s)
     (if (null? s)
         #f
-        (exist?-cps name (caar s) (lambda (v) v) (lambda () (exist? name (cdr s)))))))
+        (exist?-cps name (get-class-closure class s) (lambda (v) v) (lambda () (exist? name (cdr s)))))))
 
 ; exist?-cps
 ; A tail recursive helper for exist?
@@ -229,6 +409,11 @@
       (else (exist-top?-cps name (cdr namelis) return)))))
 
 ; ===== Miscellaneous =====
+
+; first
+(define first
+  (lambda (lis)
+    (car lis)))
 
 ; next
 ; Given a list, return the list without its first element,
@@ -278,14 +463,18 @@
 
 ; gotoerror
 ; A default error function for branching
-(define gotoerror
+(define gotoerror2
+  (lambda (a b)
+    (error "error")))
+
+(define gotoerror1
   (lambda (a b)
     (error "error")))
 
 ; initgoto
 ; Uses goto-setup to define a function that handles errors when a "throw" statement is encountered
 (define initgoto
-    (goto-setup 'throw (lambda (s) (if (number? (throw-value s)) (error (string-append "error: " (number->string (throw-value s)))) (error (throw-value s)))) gotoerror))
+    (goto-setup 'throw (lambda (s) (if (number? (throw-value s)) (error (string-append "error: " (number->string (throw-value s)))) (error (throw-value s)))) gotoerror2))
 
 ; block_goto
 ; Uses goto-setup to define a function that jumps to a given goto spot depending on whether either break or continue are called in the block
@@ -302,8 +491,12 @@
       (eq? op 'continue))))
 
 (define func-goto
-  (lambda (goto)
-    (goto-setup 'break (error "error") (goto-setup 'continue (error "error") goto))))
+  (lambda (s goto)
+    (goto-setup 'throw (lambda (lis) (goto 'throw (list (throw-value lis) s))) (goto-setup 'break gotoerror1 (goto-setup 'continue gotoerror1 goto)))))
+
+(define gotoreturn
+  (lambda (return s)
+    (lambda (v) (return s))))
 
 ; throws
 ; Given a value and a state, combine the two in a list for the completion of the goto function defined with goto-setup
@@ -426,38 +619,13 @@
 (define returnvalue (lambda (v) v))
 
 
-(define closure
-  (lambda (params body)
-    (list params body)))
+(define fparam-length
+  (lambda (lis)
+    (fparam-length-acc lis 0)))
 
-(define fsetup
-  (lambda (params args s)
+(define fparam-length-acc
+  (lambda (lis acc)
     (cond
-      ((> (length params) (length args)) (error "Too few arguments"))
-      ((< (length params) (length args)) (error "Too many arguments"))
-      (else (fsetup-cps params args s (lambda (v) v))))))
-
-(define fsetup-cps
-  (lambda (params args s return)
-    (cond
-      ((null? params) (return s))
-      (else (fsetup-cps (cdr params) (cdr args) (insert-var (car params) (car args) s) return)))))
-
-(define function-name
-  (lambda (stmt)
-    (cadr stmt)))
-
-(define function-body
-  (lambda (stmt)
-    (cdddr stmt)))
-
-(define function-parameters
-  (lambda (stmt)
-    (caddr stmt)))
-
-(define closure-body
-  (lambda (stmt)
-    (cadr stmt)))
-(define closure-params
-  (lambda (stmt)
-    (car stmt)))
+      ((null? lis) acc)
+      ((eq? (car lis) '&) (fparam-length-acc (cdr lis) acc))
+      (else (fparam-length-acc (cdr lis) (+ 1 acc))))))

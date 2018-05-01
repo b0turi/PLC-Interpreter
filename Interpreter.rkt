@@ -38,10 +38,10 @@
 ; M_state_declare
 ; takes in a varriable, a value, and a state , checks if the varriable has already beed declared, and adds the varriable to the state with the value given
 (define M_state_declare
-  (lambda (class varname value s)
+  (lambda (varname value s)
     (cond
       ((exist-top? varname s) (error "Redefining"))
-      (else (insert-var class varname value s)))))
+      (else (insert-var varname value s)))))
 
 
 ; M_state_function
@@ -97,10 +97,10 @@
       ((not (exp? stmt)) s)
       
       ; Check if the statement creates a new variable
-      ((eq? (operator stmt) 'var) (M_state_declare class (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto)))
+      ((eq? (operator stmt) 'var) (M_state_declare (var-name stmt) (M_value (assignment stmt) s goto) (M_state_side-effect (assignment stmt) s goto)))
       
       ; Check if the statement is a function declaration
-      ((or (eq? (operator stmt) 'function) (eq? (operator stmt) 'static-function)) (M_state_declare class (function-name stmt) (fclosure (function-parameters stmt) (function-body stmt)) s))
+      ((or (eq? (operator stmt) 'function) (eq? (operator stmt) 'static-function)) (M_state_declare (function-name stmt) (fclosure (function-parameters stmt) (function-body stmt)) s))
 
       ; Check if the statement is a branching statement with a goto
       ((eq? (operator stmt) 'return) (goto 'return (realvalue (M_value class (return-exp stmt) (M_state_side-effect (assignment stmt) s goto) goto))))

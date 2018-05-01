@@ -1,0 +1,46 @@
+
+; ==========================================
+; Abstractions, Part 3
+; EECS 345 - Programming Language Concepts
+;
+; Group 23
+; Jaafar Bennani
+; Alex Hemm
+; Kyle Thompson
+; ==========================================
+
+#lang racket
+(provide (all-defined-out))
+
+; ===== Function "readers" =====
+
+; function-arguments
+; Given a statement that is assumed to be a function call, retrieve the list of arguments to call the function with
+(define function-arguments
+  (lambda (stmt)
+    (cddr stmt)))
+
+; function-body
+; Given a statement that is assumed to be a function declaration, retrieve the body of the function
+(define function-body
+  (lambda (stmt)
+    (cadddr stmt)))
+
+; function-name
+; Given a statement that is assumed to be a function declaration, retrieve the name of the function
+(define function-name
+  (lambda (stmt)
+    (cadr stmt)))
+
+; function-parameters
+; Given a statement that is assumed to be a function declaration, retrieve the list of parameters for the function
+(define function-parameters
+  (lambda (stmt)
+    (caddr stmt)))
+
+; return-exp
+; Given a statement that is known to be a return statement,
+; return the value the statement dictates is to be returned
+(define return-exp
+  (lambda (stmt)
+    (cadr stmt)))
