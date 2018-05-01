@@ -11,7 +11,7 @@
 
 #lang racket
 (provide (all-defined-out))
-(require "Readers.rkt")
+(require "Readers.scm")
 
 ; ===== Class "readers" =====
 
@@ -89,47 +89,6 @@
   (lambda (stmt)
     (car stmt)))
 
-; Class Closure
-
-;cclosure
-(define cclosure
-  (lambda (parent ifields fnames fclosures)
-    (cons parent (cons ifields (cons fnames (cons fclosures '()))))))
-
-(define cclosure-parent
-  (lambda (stmt)
-    (car stmt)))
-
-(define cclosure-ifields
-  (lambda (stmt)
-    (cadr stmt)))
-
-(define cclosure-fnames
-  (lambda (stmt)
-    (caddr stmt)))
-
-(define cclosure-fclosures
-  (lambda (stmt)
-    (cadddr stmt)))
-
-(define get-class-closure
-  (lambda (name s)
-    (cond
-      ((null? s) (error "class not found"))
-      ((eq? (caar s) name) (cadr s)))))
-
-; Instance Closure
-(define iclosure
-  (lambda (class ifields)
-    (list class ifields)))
-
-(define iclosure-class
-  (lambda (stmt)
-    (car stmt)))
-
-(define iclosure-ifields
-  (lambda (stmt)
-    (cadr stmt)))
 
 ; ===== Closure =====
 
@@ -253,7 +212,7 @@
   (lambda (class name s)
     (if (null? s)
         #f
-        (exist?-cps name (get-class-closure class s) (lambda (v) v) (lambda () (exist? name (cdr s)))))))
+        (exist?-cps name (caar s) (lambda (v) v) (lambda () (exist? name (cdr s)))))))
 
 ; exist?-cps
 ; A tail recursive helper for exist?
@@ -368,6 +327,10 @@
 (define dual_value?
   (lambda (op)
     (or (value_op? op) (bool_op? op))))
+
+(define next
+  (lambda (stmt)
+    (cdr stmt)))
 
 ; value_op?
 ; Given an operator, return a boolean value as to whether the operator is a value operator,
