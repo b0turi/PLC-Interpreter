@@ -94,6 +94,8 @@
   (lambda (classname parent fields methods api)
     (list (cons classname (name-lis api)) (cons parent (class-parent-lis api)) (cons fields (fieldlis-lis api)) (cons methods (methodstate-lis api)))))
 
+(define initapi (lambda () '(()()()())))
+
 (define insert-method
   (lambda (method-name method-closure s)
     (list (cons method-name (list-ref s 0)) (cons method-closure (list-ref s 1)))))
@@ -161,7 +163,7 @@
   (lambda (s)
     (cons blank-state s)))
 
-(define blank-state '(() ()))
+(define blank-state (lambda () '(() ())))
 
 ; remove_layer
 ; Remove the top layer of the list of layers within the state, and return the new state
