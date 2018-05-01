@@ -91,15 +91,36 @@
 
 ; ===== Closure =====
 
-
-
-
-; insert-var
+; insert-class
 ; Given a variable name, value, and a state, insert the variable with the given value into the state,
 ; accounting for boolean literals, and return the new state with the variable added
 (define insert-class
-  (lambda (classname parent fields methods s)
-    (cons (list (cons varname (caar s)) (cons (box value) (cadar s))) (cdr s))))
+  (lambda (classname parent fields methods api)
+    (list (cons classname (name-lis api)) (cons parent (class-parent-lis api)) (cons fields (fieldlis-lis api)) (cons methods (methodstate-lis api)))))
+
+(define insert-method
+  (lambda (method-name method-closure s)
+    (list (cons method-name (list-ref s 0)) (cons method-closure (list-ref s 1)))))
+
+(define name-lis
+  (lambda (s)
+    (list-ref s 0)))
+
+(define class-parent-lis
+  (lambda (api)
+    (list-ref api 1)))
+
+(define bind-lis
+  (lambda (s)
+    (list-ref s 1)))
+
+(define fieldlis-lis
+  (lambda (api)
+    (list-ref api 2)))
+
+(define methodstate-lis
+  (lambda (api)
+    (list-ref api 3)))
 
 ; ===== STATE =====
 
@@ -142,7 +163,9 @@
 ; Add a new layer of variables to the top of the list of layers within the state to handle scope of specific variables
 (define add_layer
   (lambda (s)
-    (cons '(() ()) s)))
+    (cons blank-state s)))
+
+(define blank-state '(() ()))
 
 ; remove_layer
 ; Remove the top layer of the list of layers within the state, and return the new state
@@ -172,16 +195,13 @@
   (lambda (varname s)
     (if (null? s)
         (error "using before declaring")
-        (lookup-cps varname (caar s) (reverse (cadar s)) (lambda (v) (if (null_value? v) (error "using before assigning") v)) (lambda () (lookup varname (cdr s)))))))
-  
-; lookup-cps
-; A tail recursive helper for lookup
-(define lookup-cps
-  (lambda (name namelis valuelis return break)
-    (cond
-      ((null? namelis) (break))
-      ((eq? name (car namelis)) (return (unbox (list-ref valuelis (length (cdr namelis))))))
-      (else (lookup-cps name (cdr namelis) valuelis return break)))))
+        (vlookups (unbox (vlookup varname (caar s) (reverse (cadar s)))) (error "using before assigning") (lookup varname (cdr s))))))
+
+(define lookup-class
+  (lambda (classname s)
+    (if (null? s)
+        (error "using before declaring")
+        (vlookups (vlookup classname (caar s) (reverse (cadar s))) (error "using before assigning") (error "using before declaring")))))
 
 ; rlookup
 ; Given a variable name and a state, check if that variable is defined in that state.
@@ -190,17 +210,29 @@
   (lambda (varname s)
     (if (null? s)
         (error "using before declaring")
-        (rlookup-cps varname (caar s) (cadar s) (lambda (v) v) (lambda () (rlookup varname (cdr s)))))))
-  
-; rlookup-cps
+        (vlookups (vlookup varname (caar s) (reverse (cadar s))) (error "using before assigning") (lookup varname (cdr s))))))
+
+(define vlookups
+  (lambda (v break continue)
+    (cond
+      ((null_value? v) (break))
+      ((eq? (noValue) v) (continue))
+      (else v))))
+
+(define vlookup
+  (lambda (name name-lis value-lis)
+    (lookup-cps name name-lis value-lis (lambda (v) v) (noValue))))
+
+; lookup-cps
 ; A tail recursive helper for lookup
-(define rlookup-cps
+(define lookup-cps
   (lambda (name namelis valuelis return break)
     (cond
       ((null? namelis) (break))
-      ((and (eq? name (car namelis)) (null_value? (car valuelis))) (error "using before assigning"))
-      ((eq? name (car namelis)) (return (car valuelis)))
-      (else (rlookup-cps name (cdr namelis) (cdr valuelis) return break)))))
+      ((eq? name (car namelis)) (return (list-ref valuelis (length (cdr namelis)))))
+      (else (lookup-cps name (cdr namelis) valuelis return break)))))
+
+(define noValue 'valueNotFound)
 
 ; boolvalue
 ; Return the literal boolean value of a given value that is assumed to be either the truevalue or falsevalue atom
