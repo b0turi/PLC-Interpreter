@@ -23,7 +23,7 @@
 
 (define M_api_main
   (lambda (class api)
-    (M_state_main class (csetup class (initstate) api) initgoto api)))
+    (M_state_main class (initstate) initgoto api)))
 ;    (csetup class (initstate) api)))
 
 (define M_api_list

@@ -193,11 +193,15 @@
 ; lookup
 ; Given a variable name and a state, check if that variable is defined in that state.
 ; Throws and appropriate error if the variable doesn't exist in the state or is uninitialized
-(define lookup
+(define lookup-helper
   (lambda (varname s)
     (if (null? s)
         (error "using before declaring")
-        (vlookups (unbox (vlookup varname (caar s) (reverse (cadar s)))) (lambda () (error "using before assigning")) (lambda () (lookup varname (cdr s)))))))
+        (vlookups (unbox (vlookup varname (caar s) (reverse (cadar s)))) (lambda () (error "using before assigning")) (lambda () (lookup-helper varname (cdr s)))))))
+
+(define lookup
+  (lambda (class api varname s)
+    (lookup-helper (varname (csetup class s api)))))
 
 (define lookup-class
   (lambda (classname s)
