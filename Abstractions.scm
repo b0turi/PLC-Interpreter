@@ -1,9 +1,9 @@
 
 ; ==========================================
-; Abstractions, Part 3
+; Abstractions, Part 4
 ; EECS 345 - Programming Language Concepts
 ;
-; Group 23
+; Group 12
 ; Jaafar Bennani
 ; Alex Hemm
 ; Kyle Thompson
@@ -63,6 +63,10 @@
       ((or (eq? (operator (car body)) 'function) (eq? (operator (car body)) 'static-function)) (class-functions-cps (cdr body) (lambda (v) (return (cons (function-name (car body)) v)))))
       (else (class-functions-cps (cdr body) return)))))
 
+(define csetup
+  (lambda (classname s api)
+    (cons (vlookup classname (name-lis api) (methodstate-lis api)) s)))
+
 
 ; Function closures
 
@@ -71,7 +75,7 @@
 ; To be used as the basis for a closure function
 (define fclosure
   (lambda (params body)
-    (list (cons 'super (cons 'this params)) body)))
+    (list (cons 'this params) body)))
 
 ; fclosure-body
 ; Given a statement that is assumed to be a closure (as created by the helper function "fclosure"), retrieve the body of the function
@@ -98,7 +102,7 @@
 
 (define insert-method
   (lambda (method-name method-closure s)
-    (list (cons method-name (list-ref s 0)) (cons method-closure (list-ref s 1)))))
+    (list (cons method-name (list-ref s 0)) (cons (box method-closure) (list-ref s 1)))))
 
 (define name-lis
   (lambda (s)
@@ -193,13 +197,13 @@
   (lambda (varname s)
     (if (null? s)
         (error "using before declaring")
-        (vlookups (unbox (vlookup varname (caar s) (reverse (cadar s)))) (error "using before assigning") (lookup varname (cdr s))))))
+        (vlookups (unbox (vlookup varname (caar s) (reverse (cadar s)))) (lambda () (error "using before assigning")) (lambda () (lookup varname (cdr s)))))))
 
 (define lookup-class
   (lambda (classname s)
     (if (null? s)
         (error "using before declaring")
-        (vlookups (vlookup classname (caar s) (reverse (cadar s))) (error "using before assigning") (error "using before declaring")))))
+        (vlookups (vlookup classname (name-lis s) (reverse (cadar s))) (error "using before assigning") (error "using before declaring")))))
 
 ; rlookup
 ; Given a variable name and a state, check if that variable is defined in that state.
@@ -208,7 +212,7 @@
   (lambda (varname s)
     (if (null? s)
         (error "using before declaring")
-        (vlookups (vlookup varname (caar s) (reverse (cadar s))) (error "using before assigning") (lookup varname (cdr s))))))
+        (vlookups (vlookup varname (caar s) (reverse (cadar s))) (error "using before assigning") (lambda () (lookup varname (cdr s)))))))
 
 (define vlookups
   (lambda (v break continue)
@@ -230,7 +234,7 @@
       ((eq? name (car namelis)) (return (list-ref valuelis (length (cdr namelis)))))
       (else (lookup-cps name (cdr namelis) valuelis return break)))))
 
-(define noValue 'valueNotFound)
+(define noValue (lambda () 'valueNotFound))
 
 ; boolvalue
 ; Return the literal boolean value of a given value that is assumed to be either the truevalue or falsevalue atom
@@ -251,7 +255,7 @@
 ; exist?
 ; Given a name and a state, check if the given name is defined anywhere in any of the layers of the state
 (define exist?
-  (lambda (class name s)
+  (lambda (name s)
     (if (null? s)
         #f
         (exist?-cps name (caar s) (lambda (v) v) (lambda () (exist? name (cdr s)))))))

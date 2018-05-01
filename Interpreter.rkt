@@ -3,7 +3,7 @@
 ; Interpreter, Part 4
 ; EECS 345 - Programming Language Concepts
 ;
-; Group 23
+; Group 12
 ; Jaafar Bennani
 ; Alex Hemm
 ; Kyle Thompson
@@ -222,7 +222,7 @@
      (lambda (return)
        (cond
          ((not (exist? fname s)) (error "Function does not exist"))
-         (else (M_state_list class (fclosure-body (lookup fname s)) (remove-layer fname (fsetup (fclosure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return return (func-goto s goto)) api)))))))
+         (else (M_state_list class (fclosure-body (lookup fname s)) (remove-layer fname (fsetup class (fclosure-params (lookup fname s)) args (add_layer s) goto)) (goto-setup 'return return (func-goto s goto)) api)))))))
 
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state

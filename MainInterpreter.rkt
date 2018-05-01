@@ -2,7 +2,7 @@
 ; Interpreter, Part 4
 ; EECS 345 - Programming Language Concepts
 ;
-; Group 23
+; Group 12
 ; Jaafar Bennani
 ; Alex Hemm
 ; Kyle Thompson
@@ -19,8 +19,13 @@
 (define interpret
   (lambda (filename classname)
     ; The initial state is empty
-    (M_state_main (string->symbol classname) (parser filename) (initstate) initgoto (M_api_list (parser filename) (initapi)))))))
-                 
+    (M_api_main (string->symbol classname) (M_api_list (parser filename) (initapi)))))
+
+(define M_api_main
+  (lambda (class api)
+    (M_state_main class (csetup class (initstate) api) initgoto api)))
+;    (csetup class (initstate) api)))
+
 (define M_api_list
   (lambda (class-list api)
     (cond
@@ -36,7 +41,6 @@
         null
         (blank-state)
         (lambda (v w) (insert-class (class-name pclass) (class-parent pclass) v w api)))))))
-
 
 (define M_api_state_list-cps
   (lambda (stmt-lis field-lis methodstate return)
