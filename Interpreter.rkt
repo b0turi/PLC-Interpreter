@@ -48,8 +48,8 @@
     (call/cc
      (lambda (return)
        (cond
-         ((not (exist? fname s)) (error "Function does not exist"))
-         (else (begin (M_state_list class (fclosure-body (lookup class api fname s)) (remove-layer fname (fsetup (fclosure-params (lookup class api fname s)) args (add_layer s) goto)) (goto-setup 'return (gotoreturn return s) (func-goto s goto)) api) s)))))))
+         ((not (exist? fname (csetup class s api))) (error "Function does not exist"))
+         (else (begin (M_state_list class (fclosure-body (lookup fname (csetup class s api))) (remove-layer fname (fsetup (fclosure-params (lookup fname (csetup class s api))) args (add_layer s) goto)) (goto-setup 'return (gotoreturn return s) (func-goto s goto)) api) s)))))))
 
 ; M_state_if
 ; Given a condition, its relevant then and else statements, and a state, return the 
@@ -200,7 +200,7 @@
       ((exp? b-stmt) (M_evaluate class b-stmt s goto api))
       ((boolean? b-stmt) b-stmt)
       ((boolvalue? b-stmt) (boolvalue b-stmt))
-      (else (lookup class api b-stmt s)))))
+      (else (lookup b-stmt (csetup class s api))))))
 
 ; M_value
 ; Given a statement and a state, retrieve the value returned by the statement
@@ -211,7 +211,7 @@
       ((null_value? stmt) (nullvalue))
       ((or (boolean? stmt) (number? stmt)) stmt)
       ((boolvalue? stmt) (boolvalue stmt))
-      (else (lookup class api stmt s)))))
+      (else (lookup stmt (csetup class s api))))))
 
 ; M_value_function
 ; Given a containing class, function name, a list of argument values, a state, and a goto continuation,
@@ -221,8 +221,8 @@
     (call/cc
      (lambda (return)
        (cond
-         ((not (exist? fname s)) (error "Function does not exist"))
-         (else (M_state_list class (fclosure-body (lookup class api fname s)) (remove-layer fname (fsetup class (fclosure-params (lookup class api fname s)) args (add_layer s) goto)) (goto-setup 'return return (func-goto s goto)) api)))))))
+         ((not (exist? fname (csetup class s api))) (error "Function does not exist"))
+         (else (M_state_list class (fclosure-body (lookup fname (csetup class s api))) (remove-layer fname (fsetup class (fclosure-params (lookup fname (csetup class s api))) args (add_layer s) goto)) (goto-setup 'return return (func-goto s goto)) api)))))))
 
 ; M_evaluate
 ; Given an expression and a state, perform the necessary operations given by the expression and return the new state
