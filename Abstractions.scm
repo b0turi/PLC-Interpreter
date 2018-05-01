@@ -94,6 +94,14 @@
 
 
 
+
+; insert-var
+; Given a variable name, value, and a state, insert the variable with the given value into the state,
+; accounting for boolean literals, and return the new state with the variable added
+(define insert-class
+  (lambda (classname parent fields methods s)
+    (cons (list (cons varname (caar s)) (cons (box value) (cadar s))) (cdr s))))
+
 ; ===== STATE =====
 
 ; insert-var
@@ -103,12 +111,17 @@
   (lambda (varname value s)
     (cons (list (cons varname (caar s)) (cons (box value) (cadar s))) (cdr s))))
 
+
 ; rinsert-var
 ; Given a variable name, value, and a state, insert the variable with the given value into the state,
 ; accounting for boolean literals, and return the new state with the variable added
 (define rinsert-var
   (lambda (varname box s)
     (cons (list (cons varname (caar s)) (cons box (cadar s))) (cdr s))))
+
+(define add-to-field-lis
+  (lambda (varname lis)
+    (cons varname lis)))
 
 ; replace-value
 ; Given a variable name, value, and state, find the location within the state where the given variable name is stored and replace its value, and return the new state

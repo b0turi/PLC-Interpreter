@@ -30,6 +30,21 @@
     (cond
       ((eq? (operator pclass) 'class) (M_api_add (class-name pclass) (class-parent pclass) 
 
+(define M_api_state-cps
+  (lambda (stmt field-lis methodstate return)
+    (cond
+      ; Check if the statement creates a new variable
+      ((eq? (operator stmt) 'var) (add-to-field-lis (var-name stmt) field-lis))
+      
+      ; Check if the statement is a function declaration
+      ((or (eq? (operator stmt) 'function) (eq? (operator stmt) 'static-function)) (M_state_declare (function-name stmt) (fclosure (function-parameters stmt) (function-body stmt)) s)))))
+
+(define M_api_state_list-cps
+  (lambda (stmt-lis field-lis methodstate return)
+   (cond
+     ((null? stmt-lis) (return field-lis methodstate))
+     (else (M_api_state_list-cps (cdr stmt-lis) field-lis methodstate return)))))
+                                                 
 ; M_state_list_init
 ; Top level interpreter code to store all classes in the state, then begin interpreting the class that was passed in as the main
 (define M_state_list_init
