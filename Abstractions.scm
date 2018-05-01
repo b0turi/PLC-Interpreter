@@ -63,10 +63,6 @@
       ((or (eq? (operator (car body)) 'function) (eq? (operator (car body)) 'static-function)) (class-functions-cps (cdr body) (lambda (v) (return (cons (function-name (car body)) v)))))
       (else (class-functions-cps (cdr body) return)))))
 
-; reconstruct
-; After a class has been stored in its closure, combine the lists of fields and functions to be interpreted individually
-
-
 
 ; Function closures
 
@@ -75,7 +71,7 @@
 ; To be used as the basis for a closure function
 (define fclosure
   (lambda (params body)
-    (list params body)))
+    (list (cons 'super (cons 'this params)) body)))
 
 ; fclosure-body
 ; Given a statement that is assumed to be a closure (as created by the helper function "fclosure"), retrieve the body of the function
@@ -429,7 +425,7 @@
 
 (define fparam-length
   (lambda (lis)
-    (fparam-length-acc lis 0)))
+    (- (fparam-length-acc lis 0) 2)))
 
 (define fparam-length-acc
   (lambda (lis acc)
